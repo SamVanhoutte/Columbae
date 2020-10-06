@@ -48,6 +48,11 @@ namespace Columbae
             return result.ToString();
         }
 
+        public bool IntersectsWith(Polyline matchingPolyline)
+        {
+            return false;
+        }
+        
         private static void EncodeNextCoordinate(long coordinate, StringBuilder result)
         {
             coordinate = coordinate < 0 ? ~(coordinate << 1) : coordinate << 1;
