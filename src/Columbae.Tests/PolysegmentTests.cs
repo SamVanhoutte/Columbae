@@ -90,6 +90,7 @@ namespace Columbae.Tests
         [InlineData("0,4,3,1", "1,1,3,3", "2,2")]
         [InlineData("0,0,3,1", "0,0,3,3", "0,0")]
         [InlineData("10,4,3,1", "10,0,3,1", "3,1")]
+        [InlineData("1,1,1,4", "0,1,3,4", "1,2")]
         public void TestIntersection(string segment1str, string segment2str, string expectedPointstr)
         {
             // arrange

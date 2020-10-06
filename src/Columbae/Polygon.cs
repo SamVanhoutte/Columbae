@@ -14,6 +14,16 @@ namespace Columbae
             Vertices = new List<Polypoint>();
         }
 
+        public Polygon(string polyLineString)
+        {
+            var polyline = new Polyline(polyLineString);
+            Vertices = new List<Polypoint>();
+            foreach (var polypoint in polyline.Points)
+            {
+                AddVertex(polypoint);
+            }
+        }
+        
         // add a vertex
         public void AddVertex(double lon, double lat)
         {
@@ -63,6 +73,23 @@ namespace Columbae
             return oddNodes;
         }
 
+        // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
+        public bool Intersects(Polyline s)
+        {
+            for (var i = 0; i < s.Points.Count; i++)
+            {
+                // Takes 1 point and the next point
+                // Modulus means the first point will be taken again for last vertex
+                var p1 = s.Points[i];
+                var p2 = s.Points[(i + 1) % s.Points.Count];
+
+                var edge = new Polysegment(p1, p2);
+                if (Intersects(edge))
+                    return true;
+            }
+
+            return false;
+        }
 
         // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
         public bool Intersects(Polysegment s)
