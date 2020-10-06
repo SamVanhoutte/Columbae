@@ -40,12 +40,29 @@ namespace Columbae
         // give the mid point
         public Polypoint MidPoint()
         {
-            return new Polypoint((Start.Longitude + End.Longitude) / 2, (Start.Latitude + End.Latitude) / 2);
+            return new Polypoint( (Start.Latitude + End.Latitude) / 2, (Start.Longitude + End.Longitude) / 2);
         }
 
         //given a point that is in line (p1,p2)
         //check if a point is in this segment
-        public bool Contains(Polypoint point)
+        public bool IsOnTheLine(Polypoint point)
+        {
+
+            //TODO : investigate this
+            if ((point.Latitude == Start.Latitude && point.Longitude == Start.Longitude)
+                || (point.Latitude == End.Latitude && point.Longitude == End.Longitude))
+            {
+                return true;
+            }
+
+            return IsInArea(point) && ((point.Longitude - Start.Longitude) / (End.Longitude - Start.Longitude) ==
+                   (point.Latitude - Start.Latitude) / (End.Latitude - Start.Latitude));
+
+        }
+
+        //given a point that is in line (p1,p2)
+        //check if a point is in this segment
+        public bool IsInArea(Polypoint point)
         {
             //TODO : investigate this
             if ((point.Latitude == Start.Latitude && point.Longitude == Start.Longitude)
@@ -54,27 +71,18 @@ namespace Columbae
                 return true;
             }
 
-            /* contain algorithm for line
-            double ax = p2.x - p1.x;
-            double ay = p2.y - p1.y;
-            double apx = P.x - p1.x;
-            double apy = P.y - p2.y;
-            if (ax * apy == ay* apx)
-                return true;
-            else
-                return false;
-            */
-            if (point.Latitude > Start.Latitude && point.Latitude < End.Latitude)
-                return true;
-            return false;
+            return (point.Longitude >= Start.Longitude &&
+                    point.Longitude <= End.Longitude && 
+                    point.Latitude >= Start.Latitude &&
+                    point.Latitude <= End.Latitude);
         }
 
         //given a point that is in line (p1,p2)
         //check if that point is inside this segment
         //segment does not contain its end points
-        public bool Contains(double lon, double lat)
+        public bool IsInArea(double lon, double lat)
         {
-            return Contains(new Polypoint(lon, lat));
+            return IsInArea(new Polypoint(lon, lat));
         }
 
         //find a intersection of this segment with another segment
@@ -96,16 +104,16 @@ namespace Columbae
             var vx1 = End.Longitude - Start.Longitude;
             var vy2 = seg.End.Latitude - seg.Start.Latitude;
             var vx2 = seg.End.Longitude - seg.Start.Longitude;
-            
+
             var t = (
-                        vy1 * (seg.Start.Longitude - Start.Longitude) 
+                        vy1 * (seg.Start.Longitude - Start.Longitude)
                         - vx1 * (seg.Start.Latitude - Start.Latitude)
                     ) /
                     (vy2 * vx1 - vx2 * vy1);
             var lon = (int) (vx2 * t + seg.Start.Longitude);
             var lat = (int) (vy2 * t + seg.Start.Latitude);
             // check if the intersection inside this segment
-            if (Contains(lon, lat) && seg.Contains(lon, lat))
+            if (IsInArea(lon, lat) && seg.IsInArea(lon, lat))
                 return new Polypoint(lon, lat);
             else
                 return null;
@@ -137,7 +145,7 @@ namespace Columbae
             var i_isLeft = ((End.Latitude - Start.Latitude) * (p.Longitude - Start.Longitude) -
                             (End.Longitude - Start.Longitude) * (p.Latitude - Start.Latitude));
             if (i_isLeft > 0) // p is on the left
-                return  Situation.Left;
+                return Situation.Left;
             else if (i_isLeft < 0)
                 return Situation.Right;
             return Situation.OnLine;

@@ -23,7 +23,7 @@ namespace Columbae.Tests
 
             // assert
             Assert.Single(polyline.Points);
-            Assert.Equal($"{latitude} {longitude}", polyline.Points[0].ToString());
+            Assert.Equal($"{longitude} {latitude}", polyline.Points[0].ToString());
 
         }
 
@@ -41,8 +41,8 @@ namespace Columbae.Tests
             // assert
             Assert.Equal(2, result.Points.Count);
             
-            Assert.Equal($"{latitude1} {longitude1}", result.Points[0].ToString());
-            Assert.Equal($"{latitude2} {longitude2}", result.Points[1].ToString());
+            Assert.Equal($"{longitude1} {latitude1}", result.Points[0].ToString());
+            Assert.Equal($"{longitude2} {latitude2}", result.Points[1].ToString());
         }
     }
 }

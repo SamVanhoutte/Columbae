@@ -2,7 +2,7 @@ using System;
 
 namespace Columbae
 {
-    public struct Polypoint
+    public class Polypoint
     {
         public Polypoint(double latitude, double longitude)
         {

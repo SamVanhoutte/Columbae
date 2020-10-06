@@ -35,8 +35,8 @@ namespace Columbae
 
             foreach (var polylinePoint in Points)
             {
-                var latitude = (long) Math.Round(polylinePoint.Longitude * 1e5);
-                var longitude = (long) Math.Round(polylinePoint.Latitude * 1e5);
+                var longitude = (long) Math.Round(polylinePoint.Longitude * 1e5);
+                var latitude = (long) Math.Round(polylinePoint.Latitude * 1e5);
 
                 EncodeNextCoordinate(latitude - lastLatitude, result);
                 EncodeNextCoordinate(longitude - lastLongitude, result);
