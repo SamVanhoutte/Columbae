@@ -12,7 +12,7 @@ namespace Columbae.Tests
         [InlineData("yqv~FeqhkA", "41.89997", "12.50083")]      // Rome
         [InlineData("_wxxEuzlsY", "35.68512", "139.66267")]     // Tokyo
         [InlineData("xuekEl|inL", "-33.45773", "-70.67095")]    // Sandiego
-        public void Polyliner_Decode_ShouldReturnArray_WithOnePositionElement(string polylineString, string latitude, string longitude)
+        public void Constructor_ShouldReturnArray_WithOnePositionElement(string polylineString, string latitude, string longitude)
         {
             // arrange
             var polyline = new Polyline(polylineString);
@@ -29,7 +29,7 @@ namespace Columbae.Tests
 
         [Theory]
         [InlineData("mfo~Fvx{uOukAoT", "41.86231", "-87.63804", "41.87458", "-87.63460")]     // Chicago
-        public void Polyliner_Decode_ShouldReturnArray_WithTwoPositionsElement(string polylineString, string latitude1, string longitude1, string latitude2, string longitude2)
+        public void Constructor_ShouldReturnArray_WithTwoPositionsElement(string polylineString, string latitude1, string longitude1, string latitude2, string longitude2)
         {
             // arrange
             var result = new Polyline(polylineString);

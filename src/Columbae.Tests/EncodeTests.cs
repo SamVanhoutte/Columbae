@@ -12,7 +12,7 @@ namespace Columbae.Tests
         [InlineData("41.89997", "12.50083", "yqv~FeqhkA")]      // Rome
         [InlineData("35.68512", "139.66267", "_wxxEuzlsY")]     // Tokyo
         [InlineData("-33.45773", "-70.67095", "xuekEl|inL")]    // Sandiego
-        public void Polyliner_EncodeListWithOneElement_ShouldReturnExpectedPolyline(string latitude, string longitude, string expectedPolyline)
+        public void ToString_WithOneElement_ShouldReturnExpectedPolyline(string latitude, string longitude, string expectedPolyline)
         {
             // arrange
             var points = new List<Polypoint> {
@@ -31,7 +31,7 @@ namespace Columbae.Tests
 
         [Theory]
         [InlineData("41.86231", "-87.63804", "41.87458", "-87.63460", "mfo~Fvx{uOukAoT")]     // Chicago
-        public void Polyliner_EncodeListWithTwoElements_ShouldReturnExpectedPolyline(string latitude1, string longitude1, string latitude2, string longitude2, string expectedPolyline)
+        public void ToString_WithTwoElements_ShouldReturnExpectedPolyline(string latitude1, string longitude1, string latitude2, string longitude2, string expectedPolyline)
         {
             // arrange
             var points = new List<Polypoint> {
