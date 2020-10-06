@@ -16,7 +16,7 @@ namespace Columbae.Tests
         {
             // arrange
             var points = new List<Polypoint> {
-                new Polypoint(double.Parse(latitude, CultureInfo.InvariantCulture), double.Parse(longitude, CultureInfo.InvariantCulture))
+                new Polypoint(double.Parse(longitude, CultureInfo.InvariantCulture), double.Parse(latitude, CultureInfo.InvariantCulture))
             };
             var polyline = new Polyline(points);
 
@@ -35,8 +35,8 @@ namespace Columbae.Tests
         {
             // arrange
             var points = new List<Polypoint> {
-                new Polypoint(double.Parse(latitude1, CultureInfo.InvariantCulture), double.Parse(longitude1, CultureInfo.InvariantCulture)),
-                new Polypoint(double.Parse(latitude2, CultureInfo.InvariantCulture), double.Parse(longitude2, CultureInfo.InvariantCulture))
+                new Polypoint(double.Parse(longitude1, CultureInfo.InvariantCulture), double.Parse(latitude1, CultureInfo.InvariantCulture)),
+                new Polypoint(double.Parse(longitude2, CultureInfo.InvariantCulture), double.Parse(latitude2, CultureInfo.InvariantCulture))
             };
             var polyline = new Polyline(points);
 

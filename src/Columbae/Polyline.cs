@@ -17,12 +17,12 @@ namespace Columbae
         {
             var polylinePoints = new List<Polypoint>(polyline.Length / 2);
 
-            for (int polylineIndex = 0, latitude = 0, longitude = 0; polylineIndex < polyline.Length;)
+            for (int idx = 0, latitude = 0, longitude = 0; idx < polyline.Length;)
             {
-                latitude += DecodeNextCoordinate(polyline, ref polylineIndex);
-                longitude += DecodeNextCoordinate(polyline, ref polylineIndex);
+                latitude += DecodeNextCoordinate(polyline, ref idx);
+                longitude += DecodeNextCoordinate(polyline, ref idx);
 
-                polylinePoints.Add(new Polypoint(latitude * 1e-5, longitude * 1e-5));
+                polylinePoints.Add(new Polypoint(longitude * 1e-5, latitude * 1e-5));
             }
 
             Points = polylinePoints;
@@ -35,8 +35,8 @@ namespace Columbae
 
             foreach (var polylinePoint in Points)
             {
-                var latitude = (long) Math.Round(polylinePoint.Latitude * 1e5);
                 var longitude = (long) Math.Round(polylinePoint.Longitude * 1e5);
+                var latitude = (long) Math.Round(polylinePoint.Latitude * 1e5);
 
                 EncodeNextCoordinate(latitude - lastLatitude, result);
                 EncodeNextCoordinate(longitude - lastLongitude, result);

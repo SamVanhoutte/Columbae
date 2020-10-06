@@ -2,6 +2,10 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Sam Vanhoutte</Authors>
+        <Description>Geo library</Description>
+        <PackageProjectUrl>https://github.com/samvanhoutte/columbae</PackageProjectUrl>
     </PropertyGroup>
 
 </Project>
