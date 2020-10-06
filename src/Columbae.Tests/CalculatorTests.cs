@@ -13,8 +13,8 @@ namespace Columbae.Tests
         public void CalculatedDistanceShouldMatch(double latitude1, double longitude1, double latitude2, double longitude2, int expectedDistance)
         {
             // arrange
-            var point1 = new Polypoint(latitude1, longitude1);
-            var point2 = new Polypoint(latitude2, longitude2);
+            var point1 = new Polypoint(longitude1, latitude1);
+            var point2 = new Polypoint(longitude2, latitude2);
 
             // act
             var distanceInKm = Calculator.CalculateDistance(point1, point2);

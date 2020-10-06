@@ -16,7 +16,7 @@ namespace Columbae
         // add a vertex
         public void AddVertex(double lon, double lat)
         {
-            var point = new Polypoint(lon, lat);
+            var point = new Polypoint(lat, lon);
             _vertices.Add(point);
         }
 

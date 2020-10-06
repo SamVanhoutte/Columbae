@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+
 namespace Columbae
 {
     public class Polysegment
@@ -40,14 +43,13 @@ namespace Columbae
         // give the mid point
         public Polypoint MidPoint()
         {
-            return new Polypoint( (Start.Latitude + End.Latitude) / 2, (Start.Longitude + End.Longitude) / 2);
+            return new Polypoint((Start.Longitude + End.Longitude) / 2, (Start.Latitude + End.Latitude) / 2);
         }
 
         //given a point that is in line (p1,p2)
         //check if a point is in this segment
         public bool IsOnTheLine(Polypoint point)
         {
-
             //TODO : investigate this
             if ((point.Latitude == Start.Latitude && point.Longitude == Start.Longitude)
                 || (point.Latitude == End.Latitude && point.Longitude == End.Longitude))
@@ -56,8 +58,7 @@ namespace Columbae
             }
 
             return IsInArea(point) && ((point.Longitude - Start.Longitude) / (End.Longitude - Start.Longitude) ==
-                   (point.Latitude - Start.Latitude) / (End.Latitude - Start.Latitude));
-
+                                       (point.Latitude - Start.Latitude) / (End.Latitude - Start.Latitude));
         }
 
         //given a point that is in line (p1,p2)
@@ -71,10 +72,15 @@ namespace Columbae
                 return true;
             }
 
-            return (point.Longitude >= Start.Longitude &&
-                    point.Longitude <= End.Longitude && 
-                    point.Latitude >= Start.Latitude &&
-                    point.Latitude <= End.Latitude);
+            var minLat = Math.Min(Start.Latitude, End.Latitude);
+            var maxLat = Math.Max(Start.Latitude, End.Latitude);
+            var minLon = Math.Min(Start.Longitude, End.Longitude);
+            var maxLon = Math.Max(Start.Longitude, End.Longitude);
+                
+            return (point.Longitude >= minLon &&
+                    point.Longitude <= maxLon &&
+                    point.Latitude >= minLat &&
+                    point.Latitude <= maxLat);
         }
 
         //given a point that is in line (p1,p2)
@@ -82,7 +88,7 @@ namespace Columbae
         //segment does not contain its end points
         public bool IsInArea(double lon, double lat)
         {
-            return IsInArea(new Polypoint(lon, lat));
+            return IsInArea(new Polypoint(lat, lon));
         }
 
         //find a intersection of this segment with another segment
@@ -114,9 +120,8 @@ namespace Columbae
             var lat = (int) (vy2 * t + seg.Start.Latitude);
             // check if the intersection inside this segment
             if (IsInArea(lon, lat) && seg.IsInArea(lon, lat))
-                return new Polypoint(lon, lat);
-            else
-                return null;
+                return new Polypoint(lat, lon);
+            return null;
         }
 
         //find a inside intersection of this segment with another segment
@@ -140,34 +145,50 @@ namespace Columbae
         // 0 if point is on line
         // 1 for left
         // -1 for right
-        public Situation IsPointLeft(Polypoint p)
+        public PointPosition GetPointPositioning(Polypoint p)
         {
             var i_isLeft = ((End.Latitude - Start.Latitude) * (p.Longitude - Start.Longitude) -
                             (End.Longitude - Start.Longitude) * (p.Latitude - Start.Latitude));
             if (i_isLeft > 0) // p is on the left
-                return Situation.Left;
+                return PointPosition.Left;
             else if (i_isLeft < 0)
-                return Situation.Right;
-            return Situation.OnLine;
+                return PointPosition.Right;
+            return PointPosition.OnLine;
         }
 
         // check if a point is end point of this segment
         public bool IsEndPoint(Polypoint p)
         {
-            if (Start.Equals(p) || End.Equals(p))
-                return true;
-            return false;
+            return Start.Equals(p) || End.Equals(p);
         }
 
         // check if a point is end point of this segment
         public bool IsEndPoint(double x, double y)
         {
-            var tmp = new Polypoint(x, y);
+            var tmp = new Polypoint(y, x);
             return IsEndPoint(tmp);
+        }
+
+        public static Polysegment Parse(string segmentString)
+        {
+            // Format should be of X1,Y1,X2,Y2
+            var coordinates = segmentString.Split(',');
+            if (coordinates.Length == 4)
+            {
+                if (coordinates.All(s => double.TryParse(s, out var d)))
+                {
+                    //TODO :localization
+                    return new Polysegment(
+                        new Polypoint(double.Parse(coordinates[0]), double.Parse(coordinates[1])),
+                        new Polypoint(double.Parse(coordinates[2]), double.Parse(coordinates[3])));
+                }
+            }
+
+            return null;
         }
     }
 
-    public enum Situation
+    public enum PointPosition
     {
         OnLine = 0,
         Left = 1,

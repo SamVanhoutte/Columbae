@@ -22,7 +22,7 @@ namespace Columbae
                 latitude += DecodeNextCoordinate(polyline, ref idx);
                 longitude += DecodeNextCoordinate(polyline, ref idx);
 
-                polylinePoints.Add(new Polypoint(latitude * 1e-5, longitude * 1e-5));
+                polylinePoints.Add(new Polypoint(longitude * 1e-5, latitude * 1e-5));
             }
 
             Points = polylinePoints;
