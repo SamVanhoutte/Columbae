@@ -1,42 +1,57 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Columbae
 {
     public class Polygon
     {
-        private List<Polypoint> _vertices;
+        public readonly List<Polypoint> Vertices;
 
         // null constructor
         public Polygon()
         {
-            _vertices = new List<Polypoint>();
+            Vertices = new List<Polypoint>();
         }
 
         // add a vertex
         public void AddVertex(double lon, double lat)
         {
-            var point = new Polypoint(lat, lon);
-            _vertices.Add(point);
+            AddVertex(new Polypoint(lat, lon));
         }
 
+        // add a vertex
+        public void AddVertex(Polypoint point)
+        {
+            Vertices.Add(point);
+        }
+
+        // public List<Polysegment> Segments
+        // {
+        //     get
+        //     {
+        //         
+        //     }
+        // }
+        //
         // number of vertices
-        private int Size => _vertices?.Count ?? 0;
+        private int Size => Vertices?.Count ?? 0;
+
 
         // check if a point is inside this polygon or not
         public bool Contains(Polypoint point)
         {
-            var j = _vertices.Count - 1;
+            var j = Vertices.Count - 1;
             var oddNodes = false;
 
-            for (var i = 0; i < _vertices.Count; i++)
+            for (var i = 0; i < Vertices.Count; i++)
             {
-                if (_vertices[i].Longitude < point.Longitude && _vertices[j].Longitude >= point.Longitude ||
-                    _vertices[j].Longitude < point.Longitude && _vertices[i].Longitude >= point.Longitude)
+                if (Vertices[i].Longitude < point.Longitude && Vertices[j].Longitude >= point.Longitude ||
+                    Vertices[j].Longitude < point.Longitude && Vertices[i].Longitude >= point.Longitude)
                 {
-                    if (_vertices[i].Latitude +
-                        (point.Longitude - _vertices[i].Longitude) / (_vertices[j].Longitude - _vertices[i].Longitude) *
-                        (_vertices[j].Latitude - _vertices[i].Latitude) < point.Latitude)
+                    if (Vertices[i].Latitude +
+                        (point.Longitude - Vertices[i].Longitude) / (Vertices[j].Longitude - Vertices[i].Longitude) *
+                        (Vertices[j].Latitude - Vertices[i].Latitude) < point.Latitude)
                     {
                         oddNodes = !oddNodes;
                     }
@@ -52,39 +67,36 @@ namespace Columbae
         // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
         public bool Intersects(Polysegment s)
         {
-            // a triangle does not Intersect any segment of which end points are the triangle's vertices
-            //if (size() == 3)
-            //	return false;
-            // polygon has more than 3 vertices		
-            // split the big segment into parts
             Polypoint split_point = null;
             for (var i = 0; i < Size; i++)
             {
-                var p1 = _vertices[i];
-                var p2 = _vertices[(i + 1) % Size];
-                var edge = new Polysegment(p1, p2);
-                split_point = s.InterSectionExceptThisEnds(edge);
-                if (split_point != null)
-                    break;
-            }
+                // Takes 1 point and the next point
+                // Modulus means the first point will be taken again for last vertex
+                var p1 = Vertices[i];
+                var p2 = Vertices[(i + 1) % Size];
 
+                var edge = new Polysegment(p1, p2);
+                if (s.Intersects(edge, out split_point))
+                    return true;
+            }
+            //TODO : do we still need this?
             // if we can split
-            if (split_point != null) // then check each part
-            {
-                var first_part = Intersects(new Polysegment(s.Start, split_point));
-                if (first_part == true) // a part intersects means whole segment intersects
-                    return first_part;
-                // if first part doesn't intersect
-                // it depends on second one
-                var second_part = Intersects(new Polysegment(split_point, s.End));
-                return second_part;
-            }
-            // cannot split this segment
-            else
-            {
-                var result = Covers(s);
-                return result;
-            }
+            // if (split_point != null) // then check each part
+            // {
+            //     var first_part = Intersects(new Polysegment(s.Start, split_point));
+            //     if (first_part == true) // a part intersects means whole segment intersects
+            //         return first_part;
+            //     // if first part doesn't intersect
+            //     // it depends on second one
+            //     var second_part = Intersects(new Polysegment(split_point, s.End));
+            //     return second_part;
+            // }
+            // // cannot split this segment
+            // else
+            // {
+            var result = Covers(s);
+            return result;
+            // }
         }
 
         public bool Covers(Polysegment s)
@@ -109,7 +121,7 @@ namespace Columbae
         private int IndexOf(Polypoint p)
         {
             for (var i = 0; i < Size; i++)
-                if (_vertices[i].Equals(p))
+                if (Vertices[i].Equals(p))
                     return i;
             return -1;
         }
@@ -118,9 +130,32 @@ namespace Columbae
         public bool IsVertex(Polypoint p)
         {
             for (var i = 0; i < Size; i++)
-                if (_vertices[i].Equals(p))
+                if (Vertices[i].Equals(p))
                     return true;
             return false;
+        }
+
+        public static Polygon Parse(string polygonString)
+        {
+            // Format should be of X1,Y1,X2,X3,Y3,X4,Y4
+            var polygon = new Polygon();
+            var coordinates = polygonString.Split(',');
+            if (coordinates.Length >= 6 && coordinates.Length % 2 == 0) // minimum of 3 points needed
+            {
+                if (coordinates.All(s => double.TryParse(s, out var d)))
+                {
+                    for (var pointIdx = 0; pointIdx < coordinates.Length / 2; pointIdx++)
+                    {
+                        polygon.AddVertex(
+                            double.Parse(coordinates[pointIdx * 2]),
+                            double.Parse(coordinates[pointIdx * 2 + 1]));
+                    }
+
+                    return polygon;
+                }
+            }
+
+            return null;
         }
     }
 }

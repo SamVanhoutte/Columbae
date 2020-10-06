@@ -98,10 +98,10 @@ namespace Columbae.Tests
             var matchingPoint = Polypoint.Parse(expectedPointstr);
             
             // act
-            var interSection = segment1.InterSection(segment2);
+            var intersects = segment1.Intersects(segment2, out var interSection);
         
             // assert
-            Assert.NotNull(interSection);
+            Assert.True(intersects);
             Assert.Equal(matchingPoint, interSection);
         }
         

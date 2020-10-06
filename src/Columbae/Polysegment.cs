@@ -76,7 +76,7 @@ namespace Columbae
             var maxLat = Math.Max(Start.Latitude, End.Latitude);
             var minLon = Math.Min(Start.Longitude, End.Longitude);
             var maxLon = Math.Max(Start.Longitude, End.Longitude);
-                
+
             return (point.Longitude >= minLon &&
                     point.Longitude <= maxLon &&
                     point.Latitude >= minLat &&
@@ -91,60 +91,67 @@ namespace Columbae
             return IsInArea(new Polypoint(lat, lon));
         }
 
-        //find a intersection of this segment with another segment
-        //check equal before whenever use this method
-        public Polypoint InterSection(Polysegment seg)
+        /// <summary>
+        /// Test whether two line segments intersect. If so, calculate the intersection point.
+        /// </summary>
+        /// <param name="p">Polypoint to the start point of p.</param>
+        /// <param name="p2">Polypoint to the end point of p.</param>
+        /// <param name="q">Polypoint to the start point of q.</param>
+        /// <param name="q2">Polypoint to the end point of q.</param>
+        /// <param name="intersection">The point of intersection, if any.</param>
+        /// <param name="considerOverlapAsIntersect">Do we consider overlapping lines as intersecting?</param>
+        /// <returns>True if an intersection point was found.</returns>
+        public bool Intersects(Polysegment seg, out Polypoint intersection, bool considerOverlapAsIntersect = true)
         {
-            if (Start.Equals(seg.Start))
-                return Start;
-            if (End.Equals(seg.End))
-                return End;
-            // last point of this segment is first point of given segment
-            if (End.Equals(seg.Start))
-                return End;
-            // first point of this segment is last point of given segment
-            if (Start.Equals(seg.End))
-                return Start;
-            // find the intersection of 2 line (p1,p2) and (s.p1, s.p2)
-            var vy1 = End.Latitude - Start.Latitude;
-            var vx1 = End.Longitude - Start.Longitude;
-            var vy2 = seg.End.Latitude - seg.Start.Latitude;
-            var vx2 = seg.End.Longitude - seg.Start.Longitude;
+            intersection = null;
 
-            var t = (
-                        vy1 * (seg.Start.Longitude - Start.Longitude)
-                        - vx1 * (seg.Start.Latitude - Start.Latitude)
-                    ) /
-                    (vy2 * vx1 - vx2 * vy1);
-            var lon = (int) (vx2 * t + seg.Start.Longitude);
-            var lat = (int) (vy2 * t + seg.Start.Latitude);
-            // check if the intersection inside this segment
-            if (IsInArea(lon, lat) && seg.IsInArea(lon, lat))
-                return new Polypoint(lat, lon);
-            return null;
+            var r = End - Start;
+            var s = seg.End - seg.Start;
+            var rxs = r.Cross(s);
+            var qpxr = (seg.Start - Start).Cross(r);
+
+            // If r x s = 0 and (q - p) x r = 0, then the two lines are collinear.
+            if (rxs.IsZero() && qpxr.IsZero())
+            {
+                // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
+                // then the two lines are overlapping,
+                if (considerOverlapAsIntersect)
+                    if ((0 <= (seg.Start - Start) * r && (seg.Start - Start) * r <= r * r) || (0 <= (Start - seg.Start) * s && (Start - seg.Start) * s <= s * s))
+                        return true;
+
+                // 2. If neither 0 <= (q - p) * r ≤ r * r nor 0 <= (p - q) * s <= s * s
+                // then the two lines are collinear but disjoint.
+                // No need to implement this expression, as it follows from the expression above.
+                return false;
+            }
+
+            // 3. If r x s = 0 and (q - p) x r != 0, then the two lines are parallel and non-intersecting.
+            if (rxs.IsZero() && !qpxr.IsZero())
+                return false;
+
+            // t = (q - p) x s / (r x s)
+            var t = (seg.Start - Start).Cross(s) / rxs;
+
+            // u = (q - p) x r / (r x s)
+
+            var u = (seg.Start - Start).Cross(r) / rxs;
+
+            // 4. If r x s != 0 and 0 <= t <= 1 and 0 <= u <= 1
+            // the two line segments meet at the point p + t r = q + u s.
+            if (!rxs.IsZero() && (0 <= t && t <= 1) && (0 <= u && u <= 1))
+            {
+                // We can calculate the intersection point using either t or u.
+                intersection = Start + t * r;
+
+                // An intersection was found.
+                return true;
+            }
+
+            // 5. Otherwise, the two line segments are not parallel but do not intersect.
+            return false;
         }
 
-        //find a inside intersection of this segment with another segment
-        //check equal before whenever use this method
-        public Polypoint InterSectionExceptThisEnds(Polysegment s)
-        {
-            if (Start.Equals(s.Start))
-                return null;
-            if (End.Equals(s.End))
-                return null;
-            // last point of this segment is first point of given segment
-            if (End.Equals(s.Start))
-                return null;
-            // first point of this segment is last point of given segment
-            if (Start.Equals(s.End))
-                return null;
-            return InterSection(s);
-        }
 
-        // check if a point is on the left of this segment or not
-        // 0 if point is on line
-        // 1 for left
-        // -1 for right
         public PointPosition GetPointPositioning(Polypoint p)
         {
             var i_isLeft = ((End.Latitude - Start.Latitude) * (p.Longitude - Start.Longitude) -

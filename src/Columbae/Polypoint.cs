@@ -51,5 +51,34 @@ namespace Columbae
 
             return null;
         }
+        public double Cross(Polypoint point)
+        {
+            return Longitude * point.Latitude - Latitude * point.Longitude;
+        }
+        
+        public static Polypoint operator -(Polypoint v, Polypoint w)
+        {
+            return new Polypoint(v.Longitude - w.Longitude, v.Latitude - w.Latitude);
+        }
+
+        public static Polypoint operator +(Polypoint v, Polypoint w)
+        {
+            return new Polypoint(v.Longitude + w.Longitude, v.Latitude + w.Latitude);
+        }
+
+        public static double operator *(Polypoint v, Polypoint w)
+        {
+            return v.Longitude * w.Longitude + v.Latitude * w.Latitude;
+        }
+
+        public static Polypoint operator *(Polypoint v, double mult)
+        {
+            return new Polypoint(v.Longitude * mult, v.Latitude * mult);
+        }
+
+        public static Polypoint operator *(double mult, Polypoint v)
+        {
+            return new Polypoint(v.Longitude * mult, v.Latitude * mult);
+        }
     }
 }
