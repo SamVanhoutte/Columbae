@@ -1,20 +1,21 @@
 namespace Columbae
 {
-    public struct Polypoint
+    public class Polypoint
     {
-        public Polypoint(double latitude, double longitude)
+        public Polypoint(double longitude, double latitude)
         {
-            Latitude = latitude;
             Longitude = longitude;
+            Latitude = latitude;
         }
 
         public override string ToString()
         {
-            return $"{Latitude:0.00000} {Longitude:0.00000}";
+            return $"{Longitude:0.00000} {Latitude:0.00000}";
         }
 
-        public double Latitude { get; private set; }
-
         public double Longitude { get; private set; }
+
+        public double Latitude { get; private set; }
+        
     }
 }
