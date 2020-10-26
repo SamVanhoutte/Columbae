@@ -1,10 +1,9 @@
-using System;
 using System.Xml.Serialization;
 
-namespace Cotacol.Models.Routes
+namespace Columbae.Routing.Gpx
 {
     [XmlRoot(ElementName = "gpx", Namespace = "http://www.topografix.com/GPX/1/1")]
-    public class GpxRoute
+    internal class GpxRoute
     {
         [XmlElement(ElementName = "metadata", Namespace = "http://www.topografix.com/GPX/1/1")]
         public Metadata Metadata { get; set; }

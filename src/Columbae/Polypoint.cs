@@ -19,6 +19,7 @@ namespace Columbae
         public double Latitude { get; private set; }
 
         public double Longitude { get; private set; }
+        public double Elevation { get; private set; } = 0.0D;
 
         public override bool Equals(object obj)
         {

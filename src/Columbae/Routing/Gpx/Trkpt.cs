@@ -1,9 +1,9 @@
 using System.Xml.Serialization;
 
-namespace Cotacol.Models.Routes
+namespace Columbae.Routing.Gpx
 {
     [XmlRoot(ElementName = "trkpt", Namespace = "http://www.topografix.com/GPX/1/1")]
-    public class Trkpt
+    internal class Trkpt
     {
         [XmlElement(ElementName = "ele", Namespace = "http://www.topografix.com/GPX/1/1")]
         public double Ele { get; set; }

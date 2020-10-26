@@ -1,10 +1,10 @@
 using System.Xml.Serialization;
 
-namespace Cotacol.Models.Routes
+namespace Columbae.Routing.Gpx
 {
     [XmlRoot(ElementName = "TrackPointExtension",
         Namespace = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1")]
-    public class TrackPointExtension
+    internal class TrackPointExtension
     {
         [XmlElement(ElementName = "hr", Namespace = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1")]
         public string Hr { get; set; }
