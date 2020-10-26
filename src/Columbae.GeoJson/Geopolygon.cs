@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+using Newtonsoft.Json;
 
 
 namespace Columbae.GeoJson
@@ -20,11 +21,15 @@ namespace Columbae.GeoJson
 
         public override string ToString()
         {
-            return JsonSerializer.Serialize(new Linestring()
+            var stringWriter = new StringWriter();
+            var ser = new JsonSerializer();
+            var writer = new JsonTextWriter(stringWriter);
+            ser.Serialize(writer,new Linestring()
             {
                 type = "Polygon",
                 coordinates = Vertices.Select(pt => new[] {pt.Longitude, pt.Latitude}).ToArray()
             });
+            return stringWriter.ToString();
         }
 
         public static Geopolygon Parse(string json)

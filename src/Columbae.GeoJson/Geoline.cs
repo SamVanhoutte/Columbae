@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Columbae.GeoJson
 {
@@ -13,11 +13,15 @@ namespace Columbae.GeoJson
 
         public override string ToString()
         {
-            return JsonSerializer.Serialize(new Linestring()
+            var stringWriter = new StringWriter();
+            var ser = new JsonSerializer();
+            var writer = new JsonTextWriter(stringWriter);
+            ser.Serialize(writer, new Linestring()
             {
                 type = "LineString",
                 coordinates = Points.Select(pt => new[] {pt.Longitude, pt.Latitude}).ToArray()
             });
+            return stringWriter.ToString();
         }
 
         public static Geoline Parse(string json, string geoType = "LineString")
