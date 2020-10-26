@@ -42,23 +42,6 @@ namespace Columbae.Tests
         }
 
 
-        [Fact]
-        public void GeoJsonPolygon_ParseIncorrect_ShouldReturnNull()
-        {
-            // Test linestring
-            var input = "{\n\"type\":\"LineString\",\n\"coordinates\":[ 31.9, -4.8 ]\n}";
-            var point = Geopolygon.Parse(input);
-            Assert.Null(point);
 
-            // Test non numeric string
-            input = "{\n\"type2\":\"LinString\",\n\"coordinates\":[ 31.9, -4.8 ]\n}";
-            point = Geopolygon.Parse(input);
-            Assert.Null(point);
-
-            // Test missing values
-            input = "{\n\"type\":\"LinString\",\n\"coordinate\":[ 31.9, -4.8 ]\n}";
-            point = Geopolygon.Parse(input);
-            Assert.Null(point);
-        }
     }
 }

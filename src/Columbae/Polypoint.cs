@@ -19,7 +19,6 @@ namespace Columbae
         public double Latitude { get; private set; }
 
         public double Longitude { get; private set; }
-        public double Elevation { get; private set; } = 0.0D;
 
         public override bool Equals(object obj)
         {
@@ -52,6 +51,7 @@ namespace Columbae
 
             return null;
         }
+        
         public double Cross(Polypoint point)
         {
             return Longitude * point.Latitude - Latitude * point.Longitude;

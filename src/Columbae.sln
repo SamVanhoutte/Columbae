@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Columbae", "Columbae\Columb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Columbae.Tests", "Columbae.Tests\Columbae.Tests.csproj", "{08A9F317-4A6F-4360-A0CC-44B3B80E26D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Columbae.GeoJson", "Columbae.GeoJson\Columbae.GeoJson.csproj", "{7162556E-5F74-4F41-9FB3-B95C06AC9DB4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{08A9F317-4A6F-4360-A0CC-44B3B80E26D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08A9F317-4A6F-4360-A0CC-44B3B80E26D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08A9F317-4A6F-4360-A0CC-44B3B80E26D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7162556E-5F74-4F41-9FB3-B95C06AC9DB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7162556E-5F74-4F41-9FB3-B95C06AC9DB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7162556E-5F74-4F41-9FB3-B95C06AC9DB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7162556E-5F74-4F41-9FB3-B95C06AC9DB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

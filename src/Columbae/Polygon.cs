@@ -14,6 +14,11 @@ namespace Columbae
             Vertices = new List<Polypoint>();
         }
 
+        public Polygon(List<Polypoint> points)
+        {
+            Vertices = points;
+        }
+
         public Polygon(string polyLineString)
         {
             var polyline = new Polyline(polyLineString);
@@ -23,7 +28,7 @@ namespace Columbae
                 AddVertex(polypoint);
             }
         }
-        
+
         // add a vertex
         public void AddVertex(double lon, double lat)
         {
@@ -106,6 +111,7 @@ namespace Columbae
                 if (s.Intersects(edge, out split_point))
                     return true;
             }
+
             //TODO : do we still need this?
             // if we can split
             // if (split_point != null) // then check each part

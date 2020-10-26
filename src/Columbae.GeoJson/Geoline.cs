@@ -5,39 +5,38 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Columbae.GeoJson
 {
-    public class Line : Polyline
+    public class Geoline : Polyline
     {
-        public Line(List<Point> points) :
-            base(points.Select(p => new Polypoint(p.Longitude, p.Latitude)).ToList())
+        public Geoline(List<Polypoint> points) : base(points)
         {
         }
 
         public override string ToString()
         {
-            return JsonSerializer.Serialize(new GeoLine()
+            return JsonSerializer.Serialize(new Linestring()
             {
                 type = "LineString",
                 coordinates = Points.Select(pt => new[] {pt.Longitude, pt.Latitude}).ToArray()
             });
         }
 
-        public static Line Parse(string json)
+        public static Geoline Parse(string json, string geoType = "LineString")
         {
-            var points = new List<Point>();
-            var geoJsonLine = JsonConvert.DeserializeObject<GeoLine>(json);
-            if (geoJsonLine.type == "LineString")
+            var points = new List<Polypoint>();
+            var geoJsonLine = JsonConvert.DeserializeObject<Linestring>(json);
+            if (geoJsonLine.type == geoType)
             {
                 if (geoJsonLine.coordinates != null)
                 {
-                    points = geoJsonLine.coordinates.Select(c => new Point(c[0], c[1])).ToList();
-                    return new Line(points);
+                    points = geoJsonLine.coordinates.Select(c => new Polypoint(c[0], c[1])).ToList();
+                    return new Geoline(points);
                 }
             }
 
             return null;
         }
         
-        private struct GeoLine
+        private struct Linestring
         {
             public string type { get; set; }
             public double[][] coordinates { get; set; }

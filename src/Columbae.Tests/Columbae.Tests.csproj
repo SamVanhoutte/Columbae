@@ -14,7 +14,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Columbae.GeoJson\Columbae.GeoJson.csproj" />
       <ProjectReference Include="..\Columbae\Columbae.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Routing" />
     </ItemGroup>
 
 </Project>
