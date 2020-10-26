@@ -6,6 +6,13 @@
         <Authors>Sam Vanhoutte</Authors>
         <Description>Geo library</Description>
         <PackageProjectUrl>https://github.com/samvanhoutte/columbae</PackageProjectUrl>
+        <Title>Columbae</Title>
+        <Copyright>Sam Vanhoutte</Copyright>
+        <PackageLicenseUrl>https://github.com/SamVanhoutte/Columbae/blob/main/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/SamVanhoutte/Columbae</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>geo, polyline, geofencing</PackageTags>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     </PropertyGroup>
 
 </Project>
