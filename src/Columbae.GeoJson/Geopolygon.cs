@@ -32,7 +32,7 @@ namespace Columbae.GeoJson
             return stringWriter.ToString();
         }
 
-        public static Geopolygon Parse(string json)
+        public new static Geopolygon Parse(string json)
         {
             var line = Geoline.Parse(json, "Polygon");
             return line != null ? new Geopolygon(line.Points) : null;

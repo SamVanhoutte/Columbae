@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
@@ -19,20 +21,32 @@ namespace Columbae.Routing
             _points = points;
         }
 
-        public Task ExportGpx(string fileName)
+        public async Task<string> ExportGpx()
         {
-            using var fileStream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
-            using var streamWriter = new StreamWriter(fileStream);
-            GenerateGpx(streamWriter);
-            return Task.CompletedTask;
+            await using var memStream = new MemoryStream();
+            await ExportGpx(memStream);
+            memStream.Position = 0;
+            return Encoding.UTF8.GetString(memStream.ToArray());
+        }
+        
+        public async Task ExportGpx(string fileName)
+        {
+            await using var fileStream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+            await ExportGpx(fileStream);
         }
 
-        public Task ExportGpx(StreamWriter writer)
+        public async Task ExportGpx(Stream stream)
         {
+            var streamWriter = new StreamWriter(stream);
+            await ExportGpx(streamWriter);
+        }
+        
+        public Task ExportGpx(StreamWriter writer)
+        { 
             GenerateGpx(writer);
             return Task.CompletedTask;
         }
-
+        
         private void GenerateGpx(StreamWriter outputWriter)
         {
             var route = new GpxRoute
@@ -52,6 +66,9 @@ namespace Columbae.Routing
             var serializer = new XmlSerializer(typeof(GpxRoute));
             var writer = XmlWriter.Create(outputWriter);
             serializer.Serialize(writer, route);
+            // var serializer = new DataContractSerializer(typeof(GpxRoute)); 
+            // var writer = XmlWriter.Create(outputWriter);
+            // serializer.WriteObject(writer, route);
         }
     }
     

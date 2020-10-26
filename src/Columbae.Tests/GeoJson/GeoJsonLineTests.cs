@@ -41,9 +41,18 @@ namespace Columbae.Tests
             Assert.Equal(33.4, jObject["coordinates"][1][1]);
         }
 
+        [Fact]
+        public void GeoJsonLine_ParsePolyline_ShouldWork()
+        {
+            var polylineString = "adeuHqjlUo@i@u@e@uAu@u@]sB]g@EoCe@MA_@BsA^_@Pe@DgBw@aAYkAk@}A[QBaAn@m@R";
+            var polyline = new Polyline(polylineString);
+            var geoPolyline = new Geoline(polyline.Points);
+            var outputString = geoPolyline.ToString();
+            Assert.NotNull(outputString);
+        }
 
         [Fact]
-        public void GeoJsonPoint_ParseIncorrect_ShouldReturnNull()
+        public void GeoJsonLine_ParseIncorrect_ShouldReturnNull()
         {
             // Test linestring
             var input = "{\n\"type\":\"LineString\",\n\"coordinates\":[ 31.9, -4.8 ]\n}";

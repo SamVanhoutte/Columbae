@@ -40,8 +40,5 @@ namespace Columbae.Tests
             Assert.Equal(22.3, jObject["coordinates"][0][0]);
             Assert.Equal(33.4, jObject["coordinates"][1][1]);
         }
-
-
-
     }
 }

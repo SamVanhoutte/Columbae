@@ -21,7 +21,7 @@ namespace Columbae.GeoJson
             return stringWriter.ToString();
         }
 
-        public static Geopoint Parse(string json)
+        public new static Geopoint Parse(string json)
         {
             var geoJsonPoint = JsonConvert.DeserializeObject<Pointstring>(json);
             if (geoJsonPoint.type == "Point")

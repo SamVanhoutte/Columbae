@@ -18,8 +18,4 @@
       <ProjectReference Include="..\Columbae\Columbae.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Routing" />
-    </ItemGroup>
-
 </Project>

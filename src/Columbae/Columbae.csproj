@@ -13,7 +13,7 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>geo, polyline, geofencing</PackageTags>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <PackageVersion>1.1.0</PackageVersion>
+        <PackageVersion>1.1.1-preview</PackageVersion>
     </PropertyGroup>
 
 </Project>
