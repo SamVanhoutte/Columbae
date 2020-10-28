@@ -1,5 +1,7 @@
 using System;
+using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Columbae
 {
@@ -11,14 +13,14 @@ namespace Columbae
         public Polysegment(Polypoint point1, Polypoint point2)
         {
             // Set right order of start / end
-            if (point1.Longitude < point2.Longitude)
+            if (point1.X < point2.X)
             {
                 Start = point1;
                 End = point2;
             }
             else
             {
-                if (point1.Longitude > point2.Longitude)
+                if (point1.X > point2.X)
                 {
                     Start = point2;
                     End = point1;
@@ -26,7 +28,7 @@ namespace Columbae
                 else
                 {
                     // same long
-                    if (point1.Latitude < point2.Latitude)
+                    if (point1.Y < point2.Y)
                     {
                         Start = point1;
                         End = point2;
@@ -43,7 +45,7 @@ namespace Columbae
         // give the mid point
         public Polypoint MidPoint()
         {
-            return new Polypoint((Start.Longitude + End.Longitude) / 2, (Start.Latitude + End.Latitude) / 2);
+            return new Polypoint((Start.X + End.X) / 2, (Start.Y + End.Y) / 2);
         }
 
         //given a point that is in line (p1,p2)
@@ -51,14 +53,14 @@ namespace Columbae
         public bool IsOnTheLine(Polypoint point)
         {
             //TODO : investigate this
-            if ((point.Latitude == Start.Latitude && point.Longitude == Start.Longitude)
-                || (point.Latitude == End.Latitude && point.Longitude == End.Longitude))
+            if ((point.Y == Start.Y && point.X == Start.X)
+                || (point.Y == End.Y && point.X == End.X))
             {
                 return true;
             }
 
-            return IsInArea(point) && ((point.Longitude - Start.Longitude) / (End.Longitude - Start.Longitude) ==
-                                       (point.Latitude - Start.Latitude) / (End.Latitude - Start.Latitude));
+            return IsInArea(point) && ((point.X - Start.X) / (End.X - Start.X) ==
+                                       (point.Y - Start.Y) / (End.Y - Start.Y));
         }
 
         //given a point that is in line (p1,p2)
@@ -66,21 +68,21 @@ namespace Columbae
         public bool IsInArea(Polypoint point)
         {
             //TODO : investigate this
-            if ((point.Latitude == Start.Latitude && point.Longitude == Start.Longitude)
-                || (point.Latitude == End.Latitude && point.Longitude == End.Longitude))
+            if ((point.Y == Start.Y && point.X == Start.X)
+                || (point.Y == End.Y && point.X == End.X))
             {
                 return true;
             }
 
-            var minLat = Math.Min(Start.Latitude, End.Latitude);
-            var maxLat = Math.Max(Start.Latitude, End.Latitude);
-            var minLon = Math.Min(Start.Longitude, End.Longitude);
-            var maxLon = Math.Max(Start.Longitude, End.Longitude);
+            var minLat = Math.Min(Start.Y, End.Y);
+            var maxLat = Math.Max(Start.Y, End.Y);
+            var minLon = Math.Min(Start.X, End.X);
+            var maxLon = Math.Max(Start.X, End.X);
 
-            return (point.Longitude >= minLon &&
-                    point.Longitude <= maxLon &&
-                    point.Latitude >= minLat &&
-                    point.Latitude <= maxLat);
+            return (point.X >= minLon &&
+                    point.X <= maxLon &&
+                    point.Y >= minLat &&
+                    point.Y <= maxLat);
         }
 
         //given a point that is in line (p1,p2)
@@ -116,7 +118,8 @@ namespace Columbae
                 // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
                 // then the two lines are overlapping,
                 if (considerOverlapAsIntersect)
-                    if ((0 <= (seg.Start - Start) * r && (seg.Start - Start) * r <= r * r) || (0 <= (Start - seg.Start) * s && (Start - seg.Start) * s <= s * s))
+                    if ((0 <= (seg.Start - Start) * r && (seg.Start - Start) * r <= r * r) ||
+                        (0 <= (Start - seg.Start) * s && (Start - seg.Start) * s <= s * s))
                         return true;
 
                 // 2. If neither 0 <= (q - p) * r ≤ r * r nor 0 <= (p - q) * s <= s * s
@@ -154,13 +157,47 @@ namespace Columbae
 
         public PointPosition GetPointPositioning(Polypoint p)
         {
-            var i_isLeft = ((End.Latitude - Start.Latitude) * (p.Longitude - Start.Longitude) -
-                            (End.Longitude - Start.Longitude) * (p.Latitude - Start.Latitude));
+            var i_isLeft = ((End.Y - Start.Y) * (p.X - Start.X) -
+                            (End.X - Start.X) * (p.Y - Start.Y));
             if (i_isLeft > 0) // p is on the left
                 return PointPosition.Left;
             else if (i_isLeft < 0)
                 return PointPosition.Right;
             return PointPosition.OnLine;
+        }
+
+        public bool Contains(Polypoint point, double margin = 0.0)
+        {
+            return CalculateDistance(point) <= margin;
+        }
+        
+        public double CalculateDistance(Polypoint pt)
+        {
+            //http://csharphelper.com/blog/2016/09/find-the-shortest-distance-between-a-point-and-a-line-segment-in-c/
+            var dx = End.X - Start.X;
+            var dy = End.Y - Start.Y;
+            if ((dx == 0) && (dy == 0))
+            {
+                // It's a point not a line segment.
+                return Start.GetDistance(pt);
+            }
+
+            // Calculate the t that minimizes the distance.
+            var t = ((pt.X - Start.X) * dx + (pt.Y - Start.Y) * dy) /
+                      (dx * dx + dy * dy);
+
+            Polypoint closest;
+            // See if this represents one of the segment's
+            // end points or a point between start & end.
+            // We're getting the closest point (shortest t) and will then calculate the distance
+            if (t <= 0) closest = Start;
+            else if (t >= 1) closest = End;
+            else
+            {
+                closest = new Polypoint(Start.X + t * dx, Start.Y + t * dy);
+            }
+
+            return closest.GetDistance(pt);
         }
 
         // check if a point is end point of this segment

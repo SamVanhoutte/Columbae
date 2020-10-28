@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace Columbae
 {
-    public class Polygon
+    public class Polygon 
     {
         public readonly List<Polypoint> Vertices;
 
         // null constructor
-        public Polygon()
+        public Polygon() : base()
         {
             Vertices = new List<Polypoint>();
         }
@@ -28,11 +28,24 @@ namespace Columbae
                 AddVertex(polypoint);
             }
         }
+        
 
+        public override bool Equals(object obj)
+        {
+            if (obj is Polygon polygon)
+            {
+                return string.Equals(ToString(), polygon.ToString());
+            }
+
+            return false;
+        }
+
+        public Polygon BoundingBox => new Polyline(Vertices).BoundingBox;
+        
         // add a vertex
         public void AddVertex(double lon, double lat)
         {
-            AddVertex(new Polypoint(lat, lon));
+            AddVertex(new Polypoint(lon, lat));
         }
 
         // add a vertex
@@ -61,12 +74,12 @@ namespace Columbae
 
             for (var i = 0; i < Vertices.Count; i++)
             {
-                if (Vertices[i].Longitude < point.Longitude && Vertices[j].Longitude >= point.Longitude ||
-                    Vertices[j].Longitude < point.Longitude && Vertices[i].Longitude >= point.Longitude)
+                if (Vertices[i].X < point.X && Vertices[j].X >= point.X ||
+                    Vertices[j].X < point.X && Vertices[i].X >= point.X)
                 {
-                    if (Vertices[i].Latitude +
-                        (point.Longitude - Vertices[i].Longitude) / (Vertices[j].Longitude - Vertices[i].Longitude) *
-                        (Vertices[j].Latitude - Vertices[i].Latitude) < point.Latitude)
+                    if (Vertices[i].Y +
+                        (point.X - Vertices[i].X) / (Vertices[j].X - Vertices[i].X) *
+                        (Vertices[j].Y - Vertices[i].Y) < point.Y)
                     {
                         oddNodes = !oddNodes;
                     }
@@ -78,6 +91,24 @@ namespace Columbae
             return oddNodes;
         }
 
+        // // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
+        // public bool Contains(Polyline s, double margin = 0, bool requiresDirection = false)
+        // {
+        //     for (var i = 0; i < s.Points.Count; i++)
+        //     {
+        //         // Takes 1 point and the next point
+        //         // Modulus means the first point will be taken again for last vertex
+        //         var p1 = s.Points[i];
+        //         var p2 = s.Points[(i + 1) % s.Points.Count];
+        //
+        //         var edge = new Polysegment(p1, p2);
+        //         if (Intersects(edge))
+        //             return true;
+        //     }
+        //
+        //     return false;
+        // }
+        
         // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
         public bool Intersects(Polyline s)
         {

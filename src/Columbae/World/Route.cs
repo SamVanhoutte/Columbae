@@ -46,6 +46,7 @@ namespace Columbae.Routing
             GenerateGpx(writer);
             return Task.CompletedTask;
         }
+
         
         private void GenerateGpx(StreamWriter outputWriter)
         {
@@ -59,7 +60,7 @@ namespace Columbae.Routing
                 {
                     Name = Name, Type = "1", Trkseg = new Trkseg
                     {
-                        Trkpt = _points.Select(polypoint => new Trkpt {Ele = 0.0, Lat = polypoint.Latitude, Lon = polypoint.Longitude}).ToList()
+                        Trkpt = _points.Select(polypoint => new Trkpt {Ele = 0.0, Lat = polypoint.Y, Lon = polypoint.X}).ToList()
                     }
                 }
             };
@@ -69,6 +70,12 @@ namespace Columbae.Routing
             // var serializer = new DataContractSerializer(typeof(GpxRoute)); 
             // var writer = XmlWriter.Create(outputWriter);
             // serializer.WriteObject(writer, route);
+        }
+
+        public bool Contains(Polyline segment, double margin = 0.0D)
+        {
+            var line = new Polyline(_points);
+            return line.Contains(segment, margin);
         }
     }
     

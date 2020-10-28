@@ -19,7 +19,7 @@ namespace Columbae.GeoJson
             ser.Serialize(writer, new Linestring()
             {
                 type = "LineString",
-                coordinates = Points.Select(pt => new[] {pt.Longitude, pt.Latitude}).ToArray()
+                coordinates = Points.Select(pt => new[] {pt.X, pt.Y}).ToArray()
             });
             return stringWriter.ToString();
         }
@@ -38,6 +38,17 @@ namespace Columbae.GeoJson
             }
 
             return null;
+        }
+
+        public static Geoline Parse(Stream json, string geoType = "LineString")
+        {
+            var points = new List<Polypoint>();
+            using var reader = new StreamReader(json);
+            return Parse(reader.ReadToEnd(), geoType);
+        }
+        public bool Contains(Polyline section)
+        {
+            return IntersectsWith(section);
         }
         
         private struct Linestring

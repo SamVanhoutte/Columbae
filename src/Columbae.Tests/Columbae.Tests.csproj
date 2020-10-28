@@ -18,4 +18,9 @@
       <ProjectReference Include="..\Columbae\Columbae.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Resources\route01.json" />
+      <EmbeddedResource Include="Resources\route01.json" />
+    </ItemGroup>
+
 </Project>

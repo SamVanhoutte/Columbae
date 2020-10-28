@@ -17,7 +17,7 @@ namespace Columbae.GeoJson
             var stringWriter = new StringWriter();
             var ser = new JsonSerializer();
             var writer = new JsonTextWriter(stringWriter);
-            ser.Serialize(writer,new Pointstring{type = "Point", coordinates = new [] {Longitude, Latitude}});
+            ser.Serialize(writer,new Pointstring{type = "Point", coordinates = new [] {X, Y}});
             return stringWriter.ToString();
         }
 

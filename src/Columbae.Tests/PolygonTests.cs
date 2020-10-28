@@ -56,6 +56,21 @@ namespace Columbae.Tests
             // assert
             Assert.False(intersects);
         }
+        
+        [Theory]
+        [InlineData("0,1, -3,1, -1,-1.5, 3,2.5, -2,3, 2,-1, -1,2", "-3,3,3,3,3,-1.5,-3,-1.5")]
+        public void Polyline_Boundingbox_Shouldmatch(string polygonStr, string expectedBox)
+        {
+            // arrange
+            var polygon = Polygon.Parse(polygonStr);
+            var expectedMatch = Polygon.Parse(expectedBox);
+
+            // act
+            var box = polygon.BoundingBox;
+
+            // assert
+            Assert.Equal(expectedMatch, box);
+        }
 
         [Theory]
         [InlineData("mlwlH{dt\\co~BghjB", true)] // Outside to inside
@@ -77,9 +92,10 @@ namespace Columbae.Tests
         }
 
         [Theory]
-        [InlineData("0,0,0,4,1,3,4,4", 4)]
-        [InlineData("-1,-1,-4,-1,-4,-1,-4,-4", 4)]
-        public void Polygon_Parse_ShouldMatch(string polygonStr, int expectedVertices)
+        [InlineData("0,0,0,4,1,3,4,4", 4, 4, 0)]
+        [InlineData("-1,-1,-4,-1,-4,-1,-4,-4", 4, -4, -1)]
+        [InlineData("0,1, -3,1, -1,-1.5, 3,2.5, -2,3, 2,-1, -1,2",7, -1, 1)]
+        public void Polygon_Parse_ShouldMatch(string polygonStr, int expectedVertices, double lastLongitude, double firstLatitude)
         {
             // arrange
             var polygon = Polygon.Parse(polygonStr);
@@ -87,6 +103,8 @@ namespace Columbae.Tests
             // assert
             Assert.NotNull(polygon);
             Assert.Equal(expectedVertices, polygon.Vertices.Count);
+            Assert.Equal(lastLongitude, polygon.Vertices.Last().X);
+            Assert.Equal(firstLatitude, polygon.Vertices.First().Y);
         }
 
 

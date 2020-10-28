@@ -15,8 +15,8 @@ namespace Columbae.Tests
             var line = Geopolygon.Parse(input);
             Assert.NotNull(line);
             Assert.Equal(2, line.Points.Count);
-            Assert.Equal(-33.4, line.Points[0].Latitude);
-            Assert.Equal(-22.3, line.Points[1].Longitude);
+            Assert.Equal(-33.4, line.Points[0].Y);
+            Assert.Equal(-22.3, line.Points[1].X);
         }
 
 

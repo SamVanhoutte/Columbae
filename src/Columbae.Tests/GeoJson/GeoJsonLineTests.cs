@@ -15,8 +15,8 @@ namespace Columbae.Tests
             var line = Geoline.Parse(input);
             Assert.NotNull(line);
             Assert.Equal(2, line.Points.Count);
-            Assert.Equal(-33.4, line.Points[0].Latitude);
-            Assert.Equal(-22.3, line.Points[1].Longitude);
+            Assert.Equal(-33.4, line.Points[0].Y);
+            Assert.Equal(-22.3, line.Points[1].X);
         }
 
 
@@ -68,6 +68,22 @@ namespace Columbae.Tests
             input = "{\n\"type\":\"LinString\",\n\"coordinate\":[ 31.9, -4.8 ]\n}";
             point = Geopoint.Parse(input);
             Assert.Null(point);
+        }
+        
+        
+        [Theory]
+        [InlineData(@"{lfuHgvjU[j@GR[f@c@`A_AbCwBrEOr@a@jDq@|DGj@")]
+        public void GeoJson_Generate_ShouldWork(string polylineString)
+        {
+            // arrange
+            var result = new Polyline(polylineString);
+            var geoPolyline = new Geoline(result.Points);
+            
+            // test
+            var geoJson = geoPolyline.ToString();
+            
+            // assert
+            Assert.NotNull(geoJson);
         }
     }
 }

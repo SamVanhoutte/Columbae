@@ -19,8 +19,8 @@ namespace Columbae.Tests
             // Test good string
             var input = "0.2,0.3";
             var point = Polypoint.Parse(input);
-            Assert.Equal(0.2, point.Longitude);
-            Assert.Equal(0.3, point.Latitude);
+            Assert.Equal(0.2, point.X);
+            Assert.Equal(0.3, point.Y);
         }
 
         [Fact]

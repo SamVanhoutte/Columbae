@@ -44,5 +44,16 @@ namespace Columbae.Tests
             Assert.Equal($"{longitude1} {latitude1}", result.Points[0].ToString());
             Assert.Equal($"{longitude2} {latitude2}", result.Points[1].ToString());
         }
+
+        [Theory]
+        [InlineData(@"wvduHmyjU_CbAi@R_@FiAJkCz@cBd@{@T]Bu@Pq@TeAd@q@b@u@\\mAt@i@^aCtB[^Wf@w@bCI^Kv@A`AEh@]zBU`CKf@GPQTcA`A")]
+        public void Constructor_ShouldParse(string polylineString)
+        {
+            // arrange
+            var result = new Polyline(polylineString);
+
+            // assert
+            Assert.NotNull(result);
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace Columbae.GeoJson
             ser.Serialize(writer,new Linestring()
             {
                 type = "Polygon",
-                coordinates = Vertices.Select(pt => new[] {pt.Longitude, pt.Latitude}).ToArray()
+                coordinates = Vertices.Select(pt => new[] {pt.X, pt.Y}).ToArray()
             });
             return stringWriter.ToString();
         }

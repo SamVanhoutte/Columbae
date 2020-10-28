@@ -22,8 +22,8 @@ namespace Columbae.Tests
             var input = "{\n\"type\":\"Point\",\n\"coordinates\":[ 31.9, -4.8 ]\n}";
             var point = Geopoint.Parse(input);
             Assert.NotNull(point);
-            Assert.Equal(31.9, point.Longitude);
-            Assert.Equal(-4.8, point.Latitude);
+            Assert.Equal(31.9, point.X);
+            Assert.Equal(-4.8, point.Y);
         }
         
         

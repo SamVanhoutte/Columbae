@@ -17,7 +17,7 @@ namespace Columbae.Tests
             var point2 = new Polypoint(longitude2, latitude2);
 
             // act
-            var distanceInKm = Calculator.CalculateDistance(point1, point2);
+            var distanceInKm = Calculator.CalculateDistanceKilometer(point1, point2);
 
             // assert
             Assert.Equal(expectedDistance, (int)Math.Round(distanceInKm));

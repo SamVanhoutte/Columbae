@@ -68,6 +68,46 @@ namespace Columbae.Tests
             // assert
             Assert.False(result);
         }
+        
+        [Theory]
+        [InlineData("0, 0, 10, 10", "10, 10", 0D)]    // Point is on the segment
+        [InlineData("0, 0, 0, 0", "4, 3", 5D)]    // Point distance to a point
+        [InlineData("1, 1, 3, 1", "2, 2", 1D)]        // Flat line, easy calculation
+        [InlineData("1, 1, 3, 1", "-1, 1", 2D)]       // Same Y, but outside of boundary
+        [InlineData("1.5, 1.5, 3.1, 4.5", "4.7, 3.1", 2.07D)]       // Regular calculation, inside section bounds
+        [InlineData("1.5, 1.5, 3.1, 4.5", "-1.3, 3.9", 3.6D)]       // Regular calculation, inside section bounds
+        [InlineData("1.5, -1, 3, -2", "3, 4", 5.22D)]       // Same Y, but outside of boundary
+        [InlineData("1, 4, 4, 3", "5, 1", 2.24D)]       // Outside of boundary, closest to end point
+        public void Polysegment_CalculateDistance_ShouldBeCorrect(string segmentString, string pointString, double expectedDistance)
+        {
+            // arrange
+            var segment =  Polysegment.Parse(segmentString);
+            var matchingPoint =  Polypoint.Parse(pointString);
+            
+            // act
+            var result = Math.Round( segment.CalculateDistance(matchingPoint), 2);
+
+            // assert
+                Assert.Equal( expectedDistance, result);
+        }
+        
+        [Theory]
+        [InlineData("0, 0, 10, 10", "10, 10", 0D)]    // Point is on the segment
+        [InlineData("1, 1, 3, 1", "2, 2", 1D)]        // Flat line, easy calculation
+        [InlineData("1, 1, 3, 1", "-1, 1", 2D)]       // Same Y, but outside of boundary
+        [InlineData("1.5, 1.5, 3.1, 4.5", "1.85, 2.3", 0.1D)]       // Diagonal line, point on the line
+        public void Polysegment_Contains_ShouldBeCorrect(string segmentString, string pointString, double margin)
+        {
+            // arrange
+            var segment =  Polysegment.Parse(segmentString);
+            var matchingPoint =  Polypoint.Parse(pointString);
+            
+            // act
+            var result = segment.Contains(matchingPoint, margin);
+
+            // assert
+            Assert.True(result);
+        }
 
 
         [Theory]
@@ -129,10 +169,10 @@ namespace Columbae.Tests
             // Test good string
             var input = "0.2,0.3,4.5,6.5";
             var segment = Polysegment.Parse(input);
-            Assert.Equal(0.2, segment.Start.Longitude);
-            Assert.Equal(0.3, segment.Start.Latitude);
-            Assert.Equal(4.5, segment.End.Longitude);
-            Assert.Equal(6.5, segment.End.Latitude);
+            Assert.Equal(0.2, segment.Start.X);
+            Assert.Equal(0.3, segment.Start.Y);
+            Assert.Equal(4.5, segment.End.X);
+            Assert.Equal(6.5, segment.End.Y);
         }
 
         [Fact]
