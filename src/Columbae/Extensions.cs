@@ -2,7 +2,7 @@ using System;
 
 namespace Columbae
 {
-    public static class Extensions
+    internal static class Extensions
     {
         private const double Epsilon = 1e-10;
 

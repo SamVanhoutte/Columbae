@@ -6,15 +6,19 @@
         <Authors>Sam Vanhoutte</Authors>
         <Description>Geo library</Description>
         <PackageProjectUrl>https://github.com/samvanhoutte/columbae</PackageProjectUrl>
-        <Title>Columbae</Title>
+        <Title>Columbae GeoJson</Title>
         <Copyright>Sam Vanhoutte</Copyright>
         <PackageLicenseUrl>https://github.com/SamVanhoutte/Columbae/blob/main/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/SamVanhoutte/Columbae</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageTags>geo, polyline, geofencing</PackageTags>
+        <PackageTags>geojson, geo, polyline, geofencing</PackageTags>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <PackageVersion>2.0.0-preview</PackageVersion>
+        <PackageVersion>1.1.1-preview</PackageVersion>
     </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Columbae\Columbae.csproj" />
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />

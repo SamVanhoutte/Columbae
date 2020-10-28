@@ -3,22 +3,24 @@ using System.Linq;
 
 namespace Columbae
 {
-    public class Polysegment
+    public class Polysegment : IShape, IEquatable<Polysegment>
     {
-        public Polypoint Start { get; private set; }
-        public Polypoint End { get; private set; }
+        const double Tolerance = 0.001;
+
+        public Polypoint Start { get; }
+        public Polypoint End { get; }
 
         public Polysegment(Polypoint point1, Polypoint point2)
         {
             // Set right order of start / end
-            if (point1.Longitude < point2.Longitude)
+            if (point1.X < point2.X)
             {
                 Start = point1;
                 End = point2;
             }
             else
             {
-                if (point1.Longitude > point2.Longitude)
+                if (point1.X > point2.X)
                 {
                     Start = point2;
                     End = point1;
@@ -26,7 +28,7 @@ namespace Columbae
                 else
                 {
                     // same long
-                    if (point1.Latitude < point2.Latitude)
+                    if (point1.Y < point2.Y)
                     {
                         Start = point1;
                         End = point2;
@@ -43,7 +45,7 @@ namespace Columbae
         // give the mid point
         public Polypoint MidPoint()
         {
-            return new Polypoint((Start.Longitude + End.Longitude) / 2, (Start.Latitude + End.Latitude) / 2);
+            return new Polypoint((Start.X + End.X) / 2, (Start.Y + End.Y) / 2);
         }
 
         //given a point that is in line (p1,p2)
@@ -51,14 +53,13 @@ namespace Columbae
         public bool IsOnTheLine(Polypoint point)
         {
             //TODO : investigate this
-            if ((point.Latitude == Start.Latitude && point.Longitude == Start.Longitude)
-                || (point.Latitude == End.Latitude && point.Longitude == End.Longitude))
+            if ((Math.Abs(point.Y - Start.Y) < Tolerance && Math.Abs(point.X - Start.X) < Tolerance)
+                || (Math.Abs(point.Y - End.Y) < Tolerance && Math.Abs(point.X - End.X) < Tolerance))
             {
                 return true;
             }
 
-            return IsInArea(point) && ((point.Longitude - Start.Longitude) / (End.Longitude - Start.Longitude) ==
-                                       (point.Latitude - Start.Latitude) / (End.Latitude - Start.Latitude));
+            return IsInArea(point) && (Math.Abs((point.X - Start.X) / (End.X - Start.X) - (point.Y - Start.Y) / (End.Y - Start.Y)) < Tolerance);
         }
 
         //given a point that is in line (p1,p2)
@@ -66,21 +67,21 @@ namespace Columbae
         public bool IsInArea(Polypoint point)
         {
             //TODO : investigate this
-            if ((point.Latitude == Start.Latitude && point.Longitude == Start.Longitude)
-                || (point.Latitude == End.Latitude && point.Longitude == End.Longitude))
+            if ((Math.Abs(point.Y - Start.Y) < Tolerance && Math.Abs(point.X - Start.X) < Tolerance)
+                || (Math.Abs(point.Y - End.Y) < Tolerance && Math.Abs(point.X - End.X) < Tolerance))
             {
                 return true;
             }
 
-            var minLat = Math.Min(Start.Latitude, End.Latitude);
-            var maxLat = Math.Max(Start.Latitude, End.Latitude);
-            var minLon = Math.Min(Start.Longitude, End.Longitude);
-            var maxLon = Math.Max(Start.Longitude, End.Longitude);
+            var minLat = Math.Min(Start.Y, End.Y);
+            var maxLat = Math.Max(Start.Y, End.Y);
+            var minLon = Math.Min(Start.X, End.X);
+            var maxLon = Math.Max(Start.X, End.X);
 
-            return (point.Longitude >= minLon &&
-                    point.Longitude <= maxLon &&
-                    point.Latitude >= minLat &&
-                    point.Latitude <= maxLat);
+            return (point.X >= minLon &&
+                    point.X <= maxLon &&
+                    point.Y >= minLat &&
+                    point.Y <= maxLat);
         }
 
         //given a point that is in line (p1,p2)
@@ -91,16 +92,6 @@ namespace Columbae
             return IsInArea(new Polypoint(lat, lon));
         }
 
-        /// <summary>
-        /// Test whether two line segments intersect. If so, calculate the intersection point.
-        /// </summary>
-        /// <param name="p">Polypoint to the start point of p.</param>
-        /// <param name="p2">Polypoint to the end point of p.</param>
-        /// <param name="q">Polypoint to the start point of q.</param>
-        /// <param name="q2">Polypoint to the end point of q.</param>
-        /// <param name="intersection">The point of intersection, if any.</param>
-        /// <param name="considerOverlapAsIntersect">Do we consider overlapping lines as intersecting?</param>
-        /// <returns>True if an intersection point was found.</returns>
         public bool Intersects(Polysegment seg, out Polypoint intersection, bool considerOverlapAsIntersect = true)
         {
             intersection = null;
@@ -116,7 +107,8 @@ namespace Columbae
                 // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
                 // then the two lines are overlapping,
                 if (considerOverlapAsIntersect)
-                    if ((0 <= (seg.Start - Start) * r && (seg.Start - Start) * r <= r * r) || (0 <= (Start - seg.Start) * s && (Start - seg.Start) * s <= s * s))
+                    if ((0 <= (seg.Start - Start) * r && (seg.Start - Start) * r <= r * r) ||
+                        (0 <= (Start - seg.Start) * s && (Start - seg.Start) * s <= s * s))
                         return true;
 
                 // 2. If neither 0 <= (q - p) * r ≤ r * r nor 0 <= (p - q) * s <= s * s
@@ -154,13 +146,47 @@ namespace Columbae
 
         public PointPosition GetPointPositioning(Polypoint p)
         {
-            var i_isLeft = ((End.Latitude - Start.Latitude) * (p.Longitude - Start.Longitude) -
-                            (End.Longitude - Start.Longitude) * (p.Latitude - Start.Latitude));
-            if (i_isLeft > 0) // p is on the left
+            var t = ((End.Y - Start.Y) * (p.X - Start.X) -
+                            (End.X - Start.X) * (p.Y - Start.Y));
+            if (t > 0) // p is on the left
                 return PointPosition.Left;
-            else if (i_isLeft < 0)
+            if (t < 0)
                 return PointPosition.Right;
-            return PointPosition.OnLine;
+            return IsInArea(p) ? PointPosition.OnLine : PointPosition.OnLineOffSegment;
+        }
+
+        public bool Contains(Polypoint point, out Polypoint closestPoint, double margin = 0.0)
+        {
+            return CalculateDistance(point, out closestPoint) <= margin;
+        }
+        
+        public double CalculateDistance(Polypoint pt, out Polypoint closest)
+        {
+            //http://csharphelper.com/blog/2016/09/find-the-shortest-distance-between-a-point-and-a-line-segment-in-c/
+            var dx = End.X - Start.X;
+            var dy = End.Y - Start.Y;
+            if ((dx == 0) && (dy == 0))
+            {
+                // It's a point not a line segment.
+                closest = Start;
+                return Start.GetDistance(pt);
+            }
+
+            // Calculate the t that minimizes the distance.
+            var t = ((pt.X - Start.X) * dx + (pt.Y - Start.Y) * dy) /
+                      (dx * dx + dy * dy);
+
+            // See if this represents one of the segment's
+            // end points or a point between start & end.
+            // We're getting the closest point (shortest t) and will then calculate the distance
+            if (t <= 0) closest = Start;
+            else if (t >= 1) closest = End;
+            else
+            {
+                closest = new Polypoint(Start.X + t * dx, Start.Y + t * dy);
+            }
+
+            return closest.GetDistance(pt);
         }
 
         // check if a point is end point of this segment
@@ -182,7 +208,7 @@ namespace Columbae
             var coordinates = segmentString.Split(',');
             if (coordinates.Length == 4)
             {
-                if (coordinates.All(s => double.TryParse(s, out var d)))
+                if (coordinates.All(s => double.TryParse(s, out _)))
                 {
                     //TODO :localization
                     return new Polysegment(
@@ -193,12 +219,19 @@ namespace Columbae
 
             return null;
         }
+
+        public bool Equals(Polysegment other)
+        {
+            if (other == null) return false;
+            return Equals(other.Start, Start) && Equals(other.End, End);
+        }
     }
 
     public enum PointPosition
     {
         OnLine = 0,
         Left = 1,
-        Right = -1
+        Right = -1,
+        OnLineOffSegment = 2
     }
 }

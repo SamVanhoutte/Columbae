@@ -1,147 +1,110 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Columbae.GeoJson;
+using Newtonsoft.Json;
 
 namespace Columbae
 {
-    public class Polygon
+    public class Polygon : Polyline, IEquatable<Polygon>
     {
-        public readonly List<Polypoint> Vertices;
-
-        // null constructor
-        public Polygon()
+        public Polygon() : base(new List<Polypoint>())
         {
-            Vertices = new List<Polypoint>();
         }
 
-        public Polygon(string polyLineString)
+        public Polygon(Polyline line) : base(line.Vertices)
         {
-            var polyline = new Polyline(polyLineString);
-            Vertices = new List<Polypoint>();
-            foreach (var polypoint in polyline.Points)
+        }
+
+        public Polygon(List<Polypoint> vertices) : base(vertices)
+        {
+        }
+
+        public bool Equals(Polygon other)
+        {
+            return other != null && string.Equals(ToPolylineString(), other.ToPolylineString());
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Polygon polygon)
             {
-                AddVertex(polypoint);
-            }
-        }
-        
-        // add a vertex
-        public void AddVertex(double lon, double lat)
-        {
-            AddVertex(new Polypoint(lat, lon));
-        }
-
-        // add a vertex
-        public void AddVertex(Polypoint point)
-        {
-            Vertices.Add(point);
-        }
-
-        // public List<Polysegment> Segments
-        // {
-        //     get
-        //     {
-        //         
-        //     }
-        // }
-        //
-        // number of vertices
-        private int Size => Vertices?.Count ?? 0;
-
-
-        // check if a point is inside this polygon or not
-        public bool Contains(Polypoint point)
-        {
-            var j = Vertices.Count - 1;
-            var oddNodes = false;
-
-            for (var i = 0; i < Vertices.Count; i++)
-            {
-                if (Vertices[i].Longitude < point.Longitude && Vertices[j].Longitude >= point.Longitude ||
-                    Vertices[j].Longitude < point.Longitude && Vertices[i].Longitude >= point.Longitude)
-                {
-                    if (Vertices[i].Latitude +
-                        (point.Longitude - Vertices[i].Longitude) / (Vertices[j].Longitude - Vertices[i].Longitude) *
-                        (Vertices[j].Latitude - Vertices[i].Latitude) < point.Latitude)
-                    {
-                        oddNodes = !oddNodes;
-                    }
-                }
-
-                j = i;
-            }
-
-            return oddNodes;
-        }
-
-        // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
-        public bool Intersects(Polyline s)
-        {
-            for (var i = 0; i < s.Points.Count; i++)
-            {
-                // Takes 1 point and the next point
-                // Modulus means the first point will be taken again for last vertex
-                var p1 = s.Points[i];
-                var p2 = s.Points[(i + 1) % s.Points.Count];
-
-                var edge = new Polysegment(p1, p2);
-                if (Intersects(edge))
-                    return true;
+                return string.Equals(ToPolylineString(), polygon.ToPolylineString());
             }
 
             return false;
         }
 
-        // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
-        public bool Intersects(Polysegment s)
+        public override int GetHashCode()
         {
-            Polypoint split_point = null;
-            for (var i = 0; i < Size; i++)
-            {
-                // Takes 1 point and the next point
-                // Modulus means the first point will be taken again for last vertex
-                var p1 = Vertices[i];
-                var p2 = Vertices[(i + 1) % Size];
+            return ToPolylineString().GetHashCode();
+        }
 
-                var edge = new Polysegment(p1, p2);
-                if (s.Intersects(edge, out split_point))
+        public override List<Polysegment> Sections => CachedSections ??= GetSections(true);
+
+        // check if a point is inside this polygon or not
+        public bool IsInside(Polypoint pt)
+        {
+            if (Vertices.Contains(pt)) return true;
+            var result = false;
+            foreach (var polysegment in Sections)
+            {
+                var start = polysegment.Start;
+                var end = polysegment.End;
+                var position = polysegment.GetPointPositioning(pt);
+                if (position == PointPosition.OnLine)
+                {
                     return true;
+                }
+
+                if ((start.Y < pt.Y && end.Y >= pt.Y) || // If point is between start/end of section
+                    (end.Y < pt.Y && start.Y >= pt.Y)) // This includes Y values that are on the edge
+                {
+                    if (position == PointPosition.Left)
+                    {
+                        result = !result;
+                    }
+                }
             }
-            //TODO : do we still need this?
-            // if we can split
-            // if (split_point != null) // then check each part
-            // {
-            //     var first_part = Intersects(new Polysegment(s.Start, split_point));
-            //     if (first_part == true) // a part intersects means whole segment intersects
-            //         return first_part;
-            //     // if first part doesn't intersect
-            //     // it depends on second one
-            //     var second_part = Intersects(new Polysegment(split_point, s.End));
-            //     return second_part;
-            // }
-            // // cannot split this segment
-            // else
-            // {
-            var result = Covers(s);
+
             return result;
-            // }
+
+        }
+
+        // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
+        public bool Intersects(Polyline s)
+        {
+            return s.Sections.Any(Intersects);
+        }
+
+        public new bool Intersects(Polysegment s)
+        {
+            // Check if the line intersects the segment, or else if the polygon covers the segment
+            return base.Intersects(s) || Covers(s);
         }
 
         public bool Covers(Polysegment s)
         {
             // if segment is a edge of this polygon
-            var p1_pos = IndexOf(s.Start);
-            var p2_pos = IndexOf(s.End);
-            if (p1_pos != -1 && p2_pos != -1)
+            var p1Pos = IndexOf(s.Start);
+            var p2Pos = IndexOf(s.End);
+            if (p1Pos != -1 && p2Pos != -1)
             {
-                var pos_distance = Math.Abs(p1_pos - p2_pos);
-                if (pos_distance == 1 || pos_distance == Size - 1) // adjcent vertices
-                    return false;
+                // If both points are vertex of polygon, we consider it covered
+                return true;
             }
 
             // segment is unseparatable
             // so,if the mid point is inside polygon, whole segment will inside
             var mid = s.MidPoint();
-            return Contains(mid);
+            bool inside = IsInside(mid);
+            return inside;
+        }
+
+        public bool Covers(Polyline line)
+        {
+            return line.Sections.All(Covers);
         }
 
         // index of vertice
@@ -156,32 +119,41 @@ namespace Columbae
         // check if a point is one of this polygon vertices
         public bool IsVertex(Polypoint p)
         {
-            for (var i = 0; i < Size; i++)
-                if (Vertices[i].Equals(p))
-                    return true;
-            return false;
+            return Vertices.Contains(p);
         }
 
-        public static Polygon Parse(string polygonString)
+        public new static Polygon ParseCsv(string polygonString)
         {
-            // Format should be of X1,Y1,X2,X3,Y3,X4,Y4
-            var polygon = new Polygon();
-            var coordinates = polygonString.Split(',');
-            if (coordinates.Length >= 6 && coordinates.Length % 2 == 0) // minimum of 3 points needed
+            var line = Polyline.ParseCsv(polygonString);
+            if (line != null && line.Vertices.Count > 2) return new Polygon(line);
+            return null;
+        }
+        
+        public new string ToJson()
+        {
+            var stringWriter = new StringWriter();
+            var ser = new JsonSerializer();
+            var writer = new JsonTextWriter(stringWriter);
+            ser.Serialize(writer,new Linestring()
             {
-                if (coordinates.All(s => double.TryParse(s, out var d)))
-                {
-                    for (var pointIdx = 0; pointIdx < coordinates.Length / 2; pointIdx++)
-                    {
-                        polygon.AddVertex(
-                            double.Parse(coordinates[pointIdx * 2]),
-                            double.Parse(coordinates[pointIdx * 2 + 1]));
-                    }
+                Type = "Polygon",
+                Coordinates = Vertices.Select(pt => new[] {pt.X, pt.Y}).ToArray()
+            });
+            return stringWriter.ToString();
+        }
 
-                    return polygon;
-                }
-            }
+        public static Polygon ParseJson(string json)
+        {
+            var line = Polyline.ParseJson(json, "Polygon");
+            return line != null ? new Polygon(line) : null;
+        }
 
+
+
+        public new static Polygon ParsePolyline(string polyline)
+        {
+            var line = Polyline.ParsePolyline(polyline);
+            if (line != null && line.Vertices.Count > 2) return new Polygon(line);
             return null;
         }
     }

@@ -1,9 +1,9 @@
 using System.Xml.Serialization;
 
-namespace Columbae.Routing.Gpx
+namespace Columbae.World.Gpx
 {
     [XmlRoot(ElementName = "trk", Namespace = "http://www.topografix.com/GPX/1/1")]
-    internal class Trk
+    public class Trk
     {
         [XmlElement(ElementName = "name", Namespace = "http://www.topografix.com/GPX/1/1")]
         public string Name { get; set; }

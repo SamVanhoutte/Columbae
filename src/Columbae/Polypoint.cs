@@ -1,49 +1,65 @@
 using System;
+using System.IO;
 using System.Linq;
+using Columbae.GeoJson;
+using Columbae.World;
+using Newtonsoft.Json;
 
 namespace Columbae
 {
-    public class Polypoint
+    public class Polypoint : IShape
     {
         public Polypoint(double longitude, double latitude)
         {
-            Latitude = latitude;
-            Longitude = longitude;
+            X = longitude;
+            Y = latitude;
         }
 
         public override string ToString()
         {
-            return $"{Longitude:0.00000} {Latitude:0.00000}";
+            return $"{X:0.00000} {Y:0.00000}";
         }
 
-        public double Latitude { get; private set; }
-
-        public double Longitude { get; private set; }
-        public double Elevation { get; private set; } = 0.0D;
+        public double Y { get; private set; }
+        public double X { get; private set; }
+        public double Longitude => X;
+        public double Latitude => Y;
 
         public override bool Equals(object obj)
         {
             if (obj is Polypoint point)
             {
-                return (Math.Abs(Latitude - point.Latitude) <= 0.00001 &&
-                        Math.Abs(Longitude - point.Longitude) <= 0.00001);
+                return (Math.Abs(Y - point.Y) <= 0.00001 &&
+                        Math.Abs(X - point.X) <= 0.00001);
             }
 
             return false;
         }
 
-        public double GetDistance(Polypoint point)
+        public override int GetHashCode()
         {
-            return Calculator.CalculateDistance(this, point);
+            return ToString().GetHashCode();
         }
 
-        public static Polypoint Parse(string description)
+        public double GetDistance(Polypoint pt)
+        {
+            var dx = pt.X - X;
+            var dy = pt.Y - Y;
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+        
+        public double CalculateDistanceKilometer(Polypoint point)
+        {
+            return Calculator.CalculateDistanceKilometer(this, point);
+        }
+
+        public static Polypoint ParseCsv(string description)
         {
             // Format should be of X1,Y1,X2,Y2
             var coordinates = description.Split(',');
             if (coordinates.Length == 2)
             {
-                if (coordinates.All(s => double.TryParse(s, out var d)))
+                if (coordinates.All(s => double.TryParse(s, out _)))
                 {
                     //TODO :localization
                     return new Polypoint(double.Parse(coordinates[0]), double.Parse(coordinates[1]));
@@ -52,34 +68,58 @@ namespace Columbae
 
             return null;
         }
+        
+        public string ToJson()
+        {
+            var stringWriter = new StringWriter();
+            var ser = new JsonSerializer();
+            var writer = new JsonTextWriter(stringWriter);
+            ser.Serialize(writer,new Pointstring{Type = "Point", Coordinates = new [] {X, Y}});
+            return stringWriter.ToString();
+        }
+
+        public static Polypoint ParseJson(string json)
+        {
+            var geoJsonPoint = JsonConvert.DeserializeObject<Pointstring>(json);
+            if (geoJsonPoint.Type == "Point")
+            {
+                if (geoJsonPoint.Coordinates != null)
+                {
+                    return new Polypoint(geoJsonPoint.Coordinates[0], geoJsonPoint.Coordinates[1]);
+                }
+            }
+
+            return null;
+        }
+        
         public double Cross(Polypoint point)
         {
-            return Longitude * point.Latitude - Latitude * point.Longitude;
+            return X * point.Y - Y * point.X;
         }
         
         public static Polypoint operator -(Polypoint v, Polypoint w)
         {
-            return new Polypoint(v.Longitude - w.Longitude, v.Latitude - w.Latitude);
+            return new Polypoint(v.X - w.X, v.Y - w.Y);
         }
 
         public static Polypoint operator +(Polypoint v, Polypoint w)
         {
-            return new Polypoint(v.Longitude + w.Longitude, v.Latitude + w.Latitude);
+            return new Polypoint(v.X + w.X, v.Y + w.Y);
         }
 
         public static double operator *(Polypoint v, Polypoint w)
         {
-            return v.Longitude * w.Longitude + v.Latitude * w.Latitude;
+            return v.X * w.X + v.Y * w.Y;
         }
 
         public static Polypoint operator *(Polypoint v, double mult)
         {
-            return new Polypoint(v.Longitude * mult, v.Latitude * mult);
+            return new Polypoint(v.X * mult, v.Y * mult);
         }
 
         public static Polypoint operator *(double mult, Polypoint v)
         {
-            return new Polypoint(v.Longitude * mult, v.Latitude * mult);
+            return new Polypoint(v.X * mult, v.Y * mult);
         }
     }
 }
