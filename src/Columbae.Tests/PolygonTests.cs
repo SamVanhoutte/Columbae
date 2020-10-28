@@ -21,7 +21,7 @@ namespace Columbae.Tests
         {
             // arrange
             var polygon = Polygon.ParseCsv(polygonStr);
-            var matchingPoint = Polypoint.Parse(pointToMatch);
+            var matchingPoint = Polypoint.ParseCsv(pointToMatch);
 
             // act
             var isContained = polygon.IsInside(matchingPoint);

@@ -168,12 +168,12 @@ namespace Columbae
             return PointPosition.OnLineOffSegment;
         }
 
-        public bool Contains(Polypoint point, double margin = 0.0)
+        public bool Contains(Polypoint point, out Polypoint closestPoint, double margin = 0.0)
         {
-            return CalculateDistance(point) <= margin;
+            return CalculateDistance(point, out closestPoint) <= margin;
         }
         
-        public double CalculateDistance(Polypoint pt)
+        public double CalculateDistance(Polypoint pt, out Polypoint closest)
         {
             //http://csharphelper.com/blog/2016/09/find-the-shortest-distance-between-a-point-and-a-line-segment-in-c/
             var dx = End.X - Start.X;
@@ -181,6 +181,7 @@ namespace Columbae
             if ((dx == 0) && (dy == 0))
             {
                 // It's a point not a line segment.
+                closest = Start;
                 return Start.GetDistance(pt);
             }
 
@@ -188,7 +189,6 @@ namespace Columbae
             var t = ((pt.X - Start.X) * dx + (pt.Y - Start.Y) * dy) /
                       (dx * dx + dy * dy);
 
-            Polypoint closest;
             // See if this represents one of the segment's
             // end points or a point between start & end.
             // We're getting the closest point (shortest t) and will then calculate the distance

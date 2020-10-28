@@ -72,10 +72,10 @@ namespace Columbae.Routing
             // serializer.WriteObject(writer, route);
         }
 
-        public bool Contains(Polyline segment, double margin = 0.0D)
+        public bool Contains(Polyline segment, double margin = 0.0D, bool verifyDirection = false)
         {
             var line = new Polyline(_points);
-            return line.Contains(segment, margin);
+            return line.Contains(segment, margin, verifyDirection);
         }
     }
     

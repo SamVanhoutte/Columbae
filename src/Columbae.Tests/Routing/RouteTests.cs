@@ -22,18 +22,53 @@ namespace Columbae.Tests.Routing
 
         [Theory]
         [InlineData("route01.json", "}cwrHkzyc@VFj@f@^?LGZe@b@a@nAaAd@o@`@y@n@uCL{@BqCJ_BHu@Nw@LKLRPb@FHFBV?|Bs@HB~@jCl@|GLz@Pl@lBdFnExIp@|Ah@`BxAbDTZ`@RDb@VtAHv@`DhJ", false)] // Cote Floriheid, outside of route
-        [InlineData("route01.json", "moduHg}iU{@rESbAM\\\\QVSRgBpAOPMRGTKr@]hEMl@]~@W^mBjBaA|A]\\\\sCxBi@XQLWl@WlAYjA[|AWh@YPO@i@Ky@Ee@Se@EWBs@RuBLm@Gg@Mw@M", true)] // Kapelleberg, ridden
+        [InlineData("route01.json", @"moduHg}iU{@rESbAM\QVSRgBpAOPMRGTKr@]hEMl@]~@W^mBjBaA|A]\sCxBi@XQLWl@WlAYjA[|AWh@YPO@i@Ky@Ee@Se@EWBs@RuBLm@Gg@Mw@M", true)] // Kapelleberg, ridden
         [InlineData("route01.json", "{lfuHgvjU[j@GR[f@c@`A_AbCwBrEOr@a@jDq@|DGj@", false)] // Hauwaert, inside route, not ridden
-        public async Task Route_Contains_Section_ShouldWork(string routeName, string segmentPolystring, bool shouldContain)
+        public void Route_Contains_Section_ShouldWork(string routeName, string segmentPolystring, bool shouldContain)
+        {
+            var route = GetRoute(routeName);
+            var segment = Polygon.ParsePolyline(segmentPolystring);
+            Assert.NotNull(route);
+            Assert.NotNull(segment);
+            var result = route.Contains(segment, 0.002);
+            
+            Assert.Equal(shouldContain, result);
+        }
+        
+        [Theory]
+        [InlineData("route01.json", @"moduHg}iU{@rESbAM\QVSRgBpAOPMRGTKr@]hEMl@]~@W^mBjBaA|A]\sCxBi@XQLWl@WlAYjA[|AWh@YPO@i@Ky@Ee@Se@EWBs@RuBLm@Gg@Mw@M", true)] // Kapelleberg, ridden
+        [InlineData("route01.json", @"cteuH_ljUmDhC{A~B{@dE_@lEe@zDsDrD", false)] // Boigne, wrong direction
+        public void Route_Contains_SectionWithDirection_ShouldWork(string routeName, string segmentPolystring, bool sameDirection)
         {
             var route = GetRoute(routeName);
             var segment = Polygon.ParsePolyline(segmentPolystring);
             Assert.NotNull(route);
             Assert.NotNull(segment);
 
-            Assert.Equal(shouldContain, route.Contains(segment, 0.002));
+            var resultWithoutDirection = route.Contains(segment, 0.002);
+            Assert.True(resultWithoutDirection);
+            var resultWithDirection = route.Contains(segment, 0.002, true);
+            Assert.Equal(sameDirection, resultWithDirection);
         }
 
+        [Theory]
+        [InlineData("0,0,10,0,10,10,5,10,10,0,0,4", "2,0,6,0,10,1,10,3", true)] 
+        [InlineData("0,0,10,0,10,10,5,10,10,0,0,4", "2,0,10,1", true)] 
+        [InlineData("0,0,10,0,10,10,5,10,10,0,0,4", "10,1,2,0", false)] 
+        public void Route_Contains_Points_SectionWithDirection_ShouldWork(string routeStr, string segmentStr, bool sameDirection)
+        {
+            var geoLine = Polyline.ParseCsv(routeStr);
+            var route = new Route(geoLine.Vertices);
+            var segment = Polyline.ParseCsv(segmentStr);
+            Assert.NotNull(route);
+            Assert.NotNull(segment);
+
+            var resultWithoutDirection = route.Contains(segment, 0);
+            Assert.True(resultWithoutDirection);
+            var resultWithDirection = route.Contains(segment, 0, true);
+            Assert.Equal(sameDirection, resultWithDirection);
+        }
+        
         private Route GetRoute(string routeName)
         {
             var asm = GetType().Assembly;
@@ -41,7 +76,8 @@ namespace Columbae.Tests.Routing
             using var stream = asm.GetManifestResourceStream(resourceName);
             if (stream == null)
                 throw new Exception($"Unable to get manifest resource stream!: {resourceName}");
-            var geoLine = Geoline.Parse(stream);
+            using var reader = new StreamReader(stream);
+            var geoLine = Polyline.ParseJson(reader.ReadToEnd());
             return new Route(geoLine.Vertices);
         }
     }

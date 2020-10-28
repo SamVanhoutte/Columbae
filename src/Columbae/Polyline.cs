@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using Columbae.GeoJson;
+using Newtonsoft.Json;
 
 namespace Columbae
 {
@@ -19,35 +22,41 @@ namespace Columbae
             Vertices = vertices;
         }
 
-        public Polysegment FullSegment => new Polysegment(Vertices.First(), Vertices.Last());
+        public Polysegment EndToEndSegment => new Polysegment(Vertices.First(), Vertices.Last());
 
-        // number of vertices
         protected int Size => Vertices?.Count ?? 0;
 
         public bool Equals(Polyline other)
         {
-            return other != null && string.Equals(ToString(), other.ToString());
+            return other != null && string.Equals(ToPolylineString(), other.ToPolylineString());
         }
 
         public override bool Equals(object obj)
         {
             if (obj is Polyline polyline)
             {
-                return string.Equals(ToString(), polyline.ToString());
+                return string.Equals(ToPolylineString(), polyline.ToPolylineString());
             }
 
             return false;
         }
 
+        public override int GetHashCode()
+        {
+            return ToPolylineString().GetHashCode();
+        }
+
         // add a Point
         public void AddVertex(double lon, double lat)
         {
+            _sections = null;
             AddVertex(new Polypoint(lon, lat));
         }
 
         // add a vertex
         public void AddVertex(Polypoint point)
         {
+            _sections = null;
             Vertices ??= new List<Polypoint>();
             Vertices.Add(point);
         }
@@ -78,25 +87,6 @@ namespace Columbae
             return Sections.Any(edge => s.Intersects(edge, out _));
         }
 
-        public override string ToString()
-        {
-            var result = new StringBuilder();
-            long lastLatitude = 0L, lastLongitude = 0L;
-
-            foreach (var polylinePoint in Vertices)
-            {
-                var longitude = (long) Math.Round(polylinePoint.X * 1e5);
-                var latitude = (long) Math.Round(polylinePoint.Y * 1e5);
-
-                EncodeNextCoordinate(latitude - lastLatitude, result);
-                EncodeNextCoordinate(longitude - lastLongitude, result);
-
-                lastLatitude = latitude;
-                lastLongitude = longitude;
-            }
-
-            return result.ToString();
-        }
 
         public bool IntersectsWith(Polyline matchingPolyline)
         {
@@ -132,22 +122,64 @@ namespace Columbae
             return (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
         }
 
-        public bool Contains(Polyline sequence, double safetyMargin = 0.0D)
+        public bool Contains(Polyline sequence, double safetyMargin = 0.0D, bool verifyDirection = false)
         {
             // First check if the start/endpoint intersect with the boundingbox.  (limiting number of points to check
             // In case the boundingbox of the line does not contain the actual start/end, we return false immediately
-            if (BoundingBox.Intersects(sequence.FullSegment))
+            if (BoundingBox.Intersects(sequence.EndToEndSegment))
             {
+                var segmentSequence = new List<Polysegment> { };
                 // Now we loop all points of the sequence and check if they are in the given boundaries of the polygon
-                return sequence.Vertices.All(sequencePoint => Contains(sequencePoint, safetyMargin));
-            }
+                foreach (var sequencePoint in sequence.Vertices)
+                {
+                    if (!Contains(sequencePoint, out _, out var containingSegment, safetyMargin))
+                    {
+                        return false;
+                    }
+                    segmentSequence.Add(containingSegment);
+                }
+                if (verifyDirection)
+                {
+                    var previousIndex = -1;
+                    foreach (var currentIndex in segmentSequence.Select(polysegment => Vertices.IndexOf(polysegment.Start)))
+                    {
+                        if (currentIndex < previousIndex)
+                        {
+                            return false;
+                        }
+                        previousIndex = currentIndex;
+                    }
+                    return true;
+                }
 
+                return true;
+            }
             return false;
         }
 
-        public bool Contains(Polypoint point, double margin = 0.0D)
+        public bool Contains(Polypoint point,  double margin = 0.0D)
         {
-            return Sections.Any(section => section.Contains(point, margin));
+            return Contains(point, out _, out _, margin);
+        }
+        public bool Contains(Polypoint point, out Polypoint closest, double margin = 0.0D)
+        {
+            return Contains(point, out closest, out _, margin);
+        }
+        
+        public bool Contains(Polypoint point, out Polypoint closest, out Polysegment containingSegment, double margin = 0.0D)
+        {
+            closest = null;
+            containingSegment = null;
+            foreach (var section in Sections)
+            {
+                if (section.Contains(point, out closest, margin))
+                {
+                    containingSegment = section;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         internal List<Polysegment> GetSections(bool closePolygon)
@@ -169,6 +201,39 @@ namespace Columbae
 
         public virtual List<Polysegment> Sections => _sections ??= GetSections(false);
 
+        public string ToPolylineString()
+        {
+            var result = new StringBuilder();
+            long lastLatitude = 0L, lastLongitude = 0L;
+
+            foreach (var polylinePoint in Vertices)
+            {
+                var longitude = (long) Math.Round(polylinePoint.X * 1e5);
+                var latitude = (long) Math.Round(polylinePoint.Y * 1e5);
+
+                EncodeNextCoordinate(latitude - lastLatitude, result);
+                EncodeNextCoordinate(longitude - lastLongitude, result);
+
+                lastLatitude = latitude;
+                lastLongitude = longitude;
+            }
+
+            return result.ToString();
+        }
+
+        public string ToJson()
+        {
+            var stringWriter = new StringWriter();
+            var ser = new JsonSerializer();
+            var writer = new JsonTextWriter(stringWriter);
+            ser.Serialize(writer, new Linestring()
+            {
+                type = "LineString",
+                coordinates = Vertices.Select(pt => new[] {pt.X, pt.Y}).ToArray()
+            });
+            return stringWriter.ToString();
+        }
+
         public static Polyline ParsePolyline(string polyline)
         {
             var vertices = new List<Polypoint>(polyline.Length / 2);
@@ -182,6 +247,22 @@ namespace Columbae
             }
 
             return new Polyline(vertices);
+        }
+
+        public static Polyline ParseJson(string json, string geoType = "LineString")
+        {
+            var points = new List<Polypoint>();
+            var geoJsonLine = JsonConvert.DeserializeObject<Linestring>(json);
+            if (geoJsonLine.type == geoType)
+            {
+                if (geoJsonLine.coordinates != null)
+                {
+                    points = geoJsonLine.coordinates.Select(c => new Polypoint(c[0], c[1])).ToList();
+                    return new Polyline(points);
+                }
+            }
+
+            return null;
         }
 
         public static Polyline ParseCsv(string csvString)

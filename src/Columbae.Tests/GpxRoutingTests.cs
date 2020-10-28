@@ -17,7 +17,7 @@ namespace Columbae.Tests
             var polyline = new Polyline(points);
 
             // act
-            var result = polyline.ToString();
+            var result = polyline.ToPolylineString();
 
             // assert
             Assert.NotNull(result);

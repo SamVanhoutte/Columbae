@@ -18,7 +18,7 @@ namespace Columbae.Tests
         {
             // Test good string
             var input = "0.2,0.3";
-            var point = Polypoint.Parse(input);
+            var point = Polypoint.ParseCsv(input);
             Assert.Equal(0.2, point.X);
             Assert.Equal(0.3, point.Y);
         }
@@ -28,17 +28,17 @@ namespace Columbae.Tests
         {
             // Test non numeric string
             var input = "0.2,0.d";
-            var point = Polypoint.Parse(input);
+            var point = Polypoint.ParseCsv(input);
             Assert.Null(point);
 
             // Test non numeric string
             input = "0.2,0.d,4.5,";
-            point = Polypoint.Parse(input);
+            point = Polypoint.ParseCsv(input);
             Assert.Null(point);
 
             // Test missing values
             input = "0.2";
-            point = Polypoint.Parse(input);
+            point = Polypoint.ParseCsv(input);
             Assert.Null(point);
         }
     }

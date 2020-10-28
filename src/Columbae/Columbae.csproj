@@ -13,7 +13,11 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>geo, polyline, geofencing</PackageTags>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <PackageVersion>1.1.1-preview</PackageVersion>
+        <PackageVersion>2.0.0-preview</PackageVersion>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    </ItemGroup>
 
 </Project>

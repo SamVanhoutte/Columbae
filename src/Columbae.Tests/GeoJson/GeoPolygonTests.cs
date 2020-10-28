@@ -12,11 +12,11 @@ namespace Columbae.Tests
         {
             // Test good string
             var input = "{\"type\":\"Polygon\",\"coordinates\":[[22.3,-33.4],[-22.3,33.4]]}";
-            var line = Geopolygon.Parse(input);
+            var line = Polygon.ParseJson(input);
             Assert.NotNull(line);
-            Assert.Equal(2, line.Points.Count);
-            Assert.Equal(-33.4, line.Points[0].Y);
-            Assert.Equal(-22.3, line.Points[1].X);
+            Assert.Equal(2, line.Vertices.Count);
+            Assert.Equal(-33.4, line.Vertices[0].Y);
+            Assert.Equal(-22.3, line.Vertices[1].X);
         }
 
 
@@ -24,13 +24,13 @@ namespace Columbae.Tests
         public void GeoJsonPolygon_ToString_ShouldBeValidJson()
         {
             // Test good string
-            var line = new Geopolygon(new List<Polypoint>
+            var line = new Polygon(new List<Polypoint>
             {
-                new Geopoint(22.3, -33.4),
-                new Geopoint(-22.3, 33.4)
+                new Polypoint(22.3, -33.4),
+                new Polypoint(-22.3, 33.4)
             });
 
-            var json = line.ToString();
+            var json = line.ToJson();
 
             var jObject = JObject.Parse(json);
             Assert.NotNull(jObject);

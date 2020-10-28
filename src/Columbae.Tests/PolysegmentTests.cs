@@ -44,7 +44,7 @@ namespace Columbae.Tests
         {
             // arrange
             var segment =  Polysegment.Parse(segmentString);
-            var matchingPoint =  Polypoint.Parse(pointString);
+            var matchingPoint =  Polypoint.ParseCsv(pointString);
 
             // act
             var result = segment.IsInArea(matchingPoint);
@@ -60,7 +60,7 @@ namespace Columbae.Tests
         {
             // arrange
             var segment =  Polysegment.Parse(segmentString);
-            var matchingPoint =  Polypoint.Parse(pointString);
+            var matchingPoint =  Polypoint.ParseCsv(pointString);
             
             // act
             var result = segment.IsOnTheLine(matchingPoint);
@@ -82,10 +82,10 @@ namespace Columbae.Tests
         {
             // arrange
             var segment =  Polysegment.Parse(segmentString);
-            var matchingPoint =  Polypoint.Parse(pointString);
+            var matchingPoint =  Polypoint.ParseCsv(pointString);
             
             // act
-            var result = Math.Round( segment.CalculateDistance(matchingPoint), 2);
+            var result = Math.Round( segment.CalculateDistance(matchingPoint, out _), 2);
 
             // assert
                 Assert.Equal( expectedDistance, result);
@@ -100,10 +100,10 @@ namespace Columbae.Tests
         {
             // arrange
             var segment =  Polysegment.Parse(segmentString);
-            var matchingPoint =  Polypoint.Parse(pointString);
+            var matchingPoint =  Polypoint.ParseCsv(pointString);
             
             // act
-            var result = segment.Contains(matchingPoint, margin);
+            var result = segment.Contains(matchingPoint, out _, margin);
 
             // assert
             Assert.True(result);
@@ -117,7 +117,7 @@ namespace Columbae.Tests
         {
             // arrange
             var segment =  Polysegment.Parse(segmentString);
-            var matchingPoint =  Polypoint.Parse(pointString);
+            var matchingPoint =  Polypoint.ParseCsv(pointString);
 
             // act
             var midPoint = segment.MidPoint();
@@ -136,7 +136,7 @@ namespace Columbae.Tests
             // arrange
             var segment1 = Polysegment.Parse(segment1str);
             var segment2 = Polysegment.Parse(segment2str);
-            var matchingPoint = Polypoint.Parse(expectedPointstr);
+            var matchingPoint = Polypoint.ParseCsv(expectedPointstr);
             
             // act
             var intersects = segment1.Intersects(segment2, out var interSection);
@@ -162,7 +162,7 @@ namespace Columbae.Tests
         {
             // arrange
             var segment = Polysegment.Parse(segmentStr);
-            var matchingPoint = Polypoint.Parse(pointToMatch);
+            var matchingPoint = Polypoint.ParseCsv(pointToMatch);
             
             // act
             var calculatedPosition = segment.GetPointPositioning(matchingPoint);

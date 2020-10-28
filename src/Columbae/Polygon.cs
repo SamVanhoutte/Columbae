@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Columbae.GeoJson;
+using Newtonsoft.Json;
 
 namespace Columbae
 {
@@ -20,17 +23,22 @@ namespace Columbae
 
         public bool Equals(Polygon other)
         {
-            return other != null && string.Equals(ToString(), other.ToString());
+            return other != null && string.Equals(ToPolylineString(), other.ToPolylineString());
         }
 
         public override bool Equals(object obj)
         {
             if (obj is Polygon polygon)
             {
-                return string.Equals(ToString(), polygon.ToString());
+                return string.Equals(ToPolylineString(), polygon.ToPolylineString());
             }
 
             return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return ToPolylineString().GetHashCode();
         }
 
         public override List<Polysegment> Sections => _sections ??= GetSections(true);
@@ -61,100 +69,8 @@ namespace Columbae
             }
 
             return result;
-            int j = Size - 1;
 
-            for (int i = 0; i < Vertices.Count(); i++)
-            {
-                if (Vertices[i].Y < pt.Y && Vertices[j].Y >= pt.Y || Vertices[j].Y < pt.Y && Vertices[i].Y >= pt.Y)
-                {
-                    if (Vertices[i].X + (pt.Y - Vertices[i].Y) / (Vertices[j].Y - Vertices[i].Y) *
-                        (Vertices[j].X - Vertices[i].X) < pt.X)
-                    {
-                        result = !result;
-                    }
-                }
-
-                j = i;
-            }
-
-
-            // var coef = Vertices.Skip(1).Select((p, i) => 
-            //         (point.Y - Vertices[i].Y)*(p.X - Vertices[i].X) 
-            //         - (point.X - Vertices[i].X) * (p.Y - Vertices[i].Y))
-            //     .ToList();
-            //
-            // if (coef.Any(p => p == 0))
-            //     return true;
-            //
-            // for (var i = 1; i < coef.Count(); i++)
-            // {
-            //     if (coef[i] * coef[i - 1] < 0)
-            //         return false;
-            // }
-            // return true;
-            //
-
-
-            // var j = Vertices.Count - 1;
-            // var oddNodes = false;
-            //
-            // foreach (var polysegment in Sections)
-            // {
-            //     var ipt = polysegment.Start;
-            //     var jpt = polysegment.End;
-            //     
-            //     if (ipt.X <= point.X && jpt.X >= point.X ||
-            //         jpt.X <= point.X && ipt.X >= point.X)  //
-            //     {
-            //         
-            //         if (ipt.Y +
-            //             (point.X - ipt.X) / (jpt.X - ipt.X) *
-            //             (jpt.Y - ipt.Y) <= point.Y)
-            //         {
-            //             oddNodes = !oddNodes;
-            //         }
-            //     }
-            // }
-
-
-            // for (var i = 0; i < Vertices.Count; i++)
-            // {
-            //     var ipt = Vertices[i];
-            //     var jpt = Vertices[j];
-            //     if (ipt.X <= point.X && jpt.X >= point.X ||
-            //         jpt.X <= point.X && ipt.X >= point.X)  //
-            //     {
-            //         if (ipt.Y +
-            //             (point.X - ipt.X) / (jpt.X - ipt.X) *
-            //             (jpt.Y - ipt.Y) <= point.Y)
-            //         {
-            //             oddNodes = !oddNodes;
-            //         }
-            //     }
-            //
-            //     j = i;
-            // }
-
-            //return oddNodes;
         }
-
-        // // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
-        // public bool Contains(Polyline s, double margin = 0, bool requiresDirection = false)
-        // {
-        //     for (var i = 0; i < s.Points.Count; i++)
-        //     {
-        //         // Takes 1 point and the next point
-        //         // Modulus means the first point will be taken again for last vertex
-        //         var p1 = s.Points[i];
-        //         var p2 = s.Points[(i + 1) % s.Points.Count];
-        //
-        //         var edge = new Polysegment(p1, p2);
-        //         if (Intersects(edge))
-        //             return true;
-        //     }
-        //
-        //     return false;
-        // }
 
         // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
         public bool Intersects(Polyline s)
@@ -203,20 +119,38 @@ namespace Columbae
         // check if a point is one of this polygon vertices
         public bool IsVertex(Polypoint p)
         {
-            for (var i = 0; i < Size; i++)
-                if (Vertices[i].Equals(p))
-                    return true;
-            return false;
+            return Vertices.Contains(p);
         }
 
-        public static Polygon ParseCsv(string polygonString)
+        public new static Polygon ParseCsv(string polygonString)
         {
             var line = Polyline.ParseCsv(polygonString);
             if (line != null && line.Vertices.Count > 2) return new Polygon(line);
             return null;
         }
+        
+        public new string ToJson()
+        {
+            var stringWriter = new StringWriter();
+            var ser = new JsonSerializer();
+            var writer = new JsonTextWriter(stringWriter);
+            ser.Serialize(writer,new Linestring()
+            {
+                type = "Polygon",
+                coordinates = Vertices.Select(pt => new[] {pt.X, pt.Y}).ToArray()
+            });
+            return stringWriter.ToString();
+        }
 
-        public static Polygon ParsePolyline(string polyline)
+        public static Polygon ParseJson(string json)
+        {
+            var line = Polyline.ParseJson(json, "Polygon");
+            return line != null ? new Polygon(line) : null;
+        }
+
+
+
+        public new static Polygon ParsePolyline(string polyline)
         {
             var line = Polyline.ParsePolyline(polyline);
             if (line != null && line.Vertices.Count > 2) return new Polygon(line);

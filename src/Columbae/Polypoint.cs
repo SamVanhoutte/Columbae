@@ -1,5 +1,8 @@
 using System;
+using System.IO;
 using System.Linq;
+using Columbae.GeoJson;
+using Newtonsoft.Json;
 
 namespace Columbae
 {
@@ -32,6 +35,11 @@ namespace Columbae
             return false;
         }
 
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+
         public double GetDistance(Polypoint pt)
         {
             var dx = pt.X - X;
@@ -44,7 +52,7 @@ namespace Columbae
             return Calculator.CalculateDistanceKilometer(this, point);
         }
 
-        public static Polypoint Parse(string description)
+        public static Polypoint ParseCsv(string description)
         {
             // Format should be of X1,Y1,X2,Y2
             var coordinates = description.Split(',');
@@ -54,6 +62,29 @@ namespace Columbae
                 {
                     //TODO :localization
                     return new Polypoint(double.Parse(coordinates[0]), double.Parse(coordinates[1]));
+                }
+            }
+
+            return null;
+        }
+        
+        public string ToJson()
+        {
+            var stringWriter = new StringWriter();
+            var ser = new JsonSerializer();
+            var writer = new JsonTextWriter(stringWriter);
+            ser.Serialize(writer,new Pointstring{type = "Point", coordinates = new [] {X, Y}});
+            return stringWriter.ToString();
+        }
+
+        public static Polypoint ParseJson(string json)
+        {
+            var geoJsonPoint = JsonConvert.DeserializeObject<Pointstring>(json);
+            if (geoJsonPoint.type == "Point")
+            {
+                if (geoJsonPoint.coordinates != null)
+                {
+                    return new Polypoint(geoJsonPoint.coordinates[0], geoJsonPoint.coordinates[1]);
                 }
             }
 

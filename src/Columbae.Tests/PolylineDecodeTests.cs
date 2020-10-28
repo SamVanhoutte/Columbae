@@ -18,7 +18,7 @@ namespace Columbae.Tests
             var polyline = Polyline.ParsePolyline(polylineString);
 
             // act
-            var conversionString = polyline.ToString();
+            var conversionString = polyline.ToPolylineString();
             Assert.Equal(polylineString, conversionString);
 
             // assert
@@ -35,7 +35,7 @@ namespace Columbae.Tests
             var result = Polyline.ParsePolyline(polylineString);
 
             // act
-            var conversionString = result.ToString();
+            var conversionString = result.ToPolylineString();
             Assert.Equal(polylineString, conversionString);
 
             // assert

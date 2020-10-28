@@ -12,33 +12,8 @@ namespace Columbae.GeoJson
         {
         }
 
-        public override string ToString()
-        {
-            var stringWriter = new StringWriter();
-            var ser = new JsonSerializer();
-            var writer = new JsonTextWriter(stringWriter);
-            ser.Serialize(writer,new Pointstring{type = "Point", coordinates = new [] {X, Y}});
-            return stringWriter.ToString();
-        }
+        
 
-        public new static Geopoint Parse(string json)
-        {
-            var geoJsonPoint = JsonConvert.DeserializeObject<Pointstring>(json);
-            if (geoJsonPoint.type == "Point")
-            {
-                if (geoJsonPoint.coordinates != null)
-                {
-                    return new Geopoint(geoJsonPoint.coordinates[0], geoJsonPoint.coordinates[1]);
-                }
-            }
 
-            return null;
-        }
-
-        private struct Pointstring
-        {
-            public string type { get; set; }
-            public double[] coordinates { get; set; }
-        }
     }
 }
