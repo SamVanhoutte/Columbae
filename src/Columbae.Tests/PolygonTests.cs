@@ -7,8 +7,6 @@ namespace Columbae.Tests
     public class PolygonTests
     {
         [Theory]
-        [InlineData("0,1,2,0,1,3,3,3,2,2", "1,1")] // Inside of polygon
-        [InlineData("0,0,0,2,2,2,2,0", "1,1")] // Inside of square
         [InlineData("0,0,0,2,2,2,2,0", "0.01,1.99")] // Close to the edge
         [InlineData("0,0,0,2,2,2,2,0", "2,2")] // On the vertex
         [InlineData("0,0,0,2,2,2,2,0", "0,0")] // On the vertex
@@ -16,7 +14,9 @@ namespace Columbae.Tests
         [InlineData("0,0,0,2,2,2,2,0", "2,0")] // On the vertex
         [InlineData("0,0,0,2,2,2,2,0", "1,0")] // On the edge
         [InlineData("0,0,0,2,2,0", "1,0")] // On triangle
+        [InlineData("0,0,0,2,2,2,2,0", "1,1")] // Inside of square
         [InlineData("0,0,2,0,2,2,0,2", "3,2", false)] // Edge
+        [InlineData("0,1,2,0,1,3,3,3,2,2", "1,1")] // Inside of polygon
         public void Polygon_IsInside_ShouldMatch(string polygonStr, string pointToMatch, bool shouldBeInside = true)
         {
             // arrange
@@ -27,7 +27,7 @@ namespace Columbae.Tests
             var isContained = polygon.IsInside(matchingPoint);
 
             // assert
-            Assert.Equal(shouldBeInside,isContained);
+            Assert.Equal(shouldBeInside, isContained);
         }
 
         [Theory]
@@ -37,6 +37,7 @@ namespace Columbae.Tests
         [InlineData("0,1,0,4,3,4,3,1", "1,2,6,3")] // Start inside, end outside
         [InlineData("0,1,0,4,3,4,3,1", "0,0,1,3")] // Start outside, end inside
         [InlineData("0,1,0,4,3,4,3,1", "-1,-2,1,3")] // Start outside, end inside
+        [InlineData("0,1,0,4,3,4,3,1", "1,3.5,3,10")] // Start & stop outside, but crossing
         public void Polygon_Intersects_ShouldMatch(string polygonStr, string segmentToMatch)
         {
             // arrange
@@ -66,6 +67,22 @@ namespace Columbae.Tests
         }
 
         [Theory]
+        [InlineData("0,1,0,4,3,4,3,1", "1,3.5,3,10", false)] // Start & stop outside, but crossing
+        [InlineData("0,1,0,4,3,4,3,1", "1,3.5,2,1.5", true)] // Start & stop outside, but crossing
+        public void Polygon_Covers_Segment_ShouldMatch(string polygonStr, string segmentToMatch, bool shouldCover)
+        {
+            // arrange
+            var polygon = Polygon.ParseCsv(polygonStr);
+            var matchingSegment = Polysegment.Parse(segmentToMatch);
+
+            // act
+            var intersects = polygon.Covers(matchingSegment);
+
+            // assert
+            Assert.Equal(shouldCover, intersects);
+        }
+        
+        [Theory]
         [InlineData("0,0,2,0,2,2,0,2", "2,2,0,2", 4)]
         [InlineData("0,0,2,2,2,0,0,2", "2,2,2,0", 4)]
         [InlineData("0,0,2,2,2,0,0,2", "0,2,0,0", 4)]
@@ -74,10 +91,10 @@ namespace Columbae.Tests
             // arrange
             var polygon = Polygon.ParseCsv(polygonStr);
             var expectedSegment = Polysegment.Parse(expectedSection);
-            
+
             // act
             var sections = polygon.Sections;
-            
+
             // assert
             Assert.Equal(expectedSections, sections.Count);
             Assert.Contains(expectedSegment, sections);
@@ -108,7 +125,7 @@ namespace Columbae.Tests
         {
             // arrange
             var polyline = Polyline.ParsePolyline(polylineStr);
-            var belgium = GeoConstants.Belgium;
+            var belgium = GeoConstants.BelgiumRough;
 
             // act
             var intersects = belgium.Intersects(polyline);
@@ -116,12 +133,64 @@ namespace Columbae.Tests
             // assert
             Assert.Equal(shouldMatch, intersects);
         }
+        
+        
 
+
+        [Theory]
+        [InlineData("klavHu}nWcwEquaBl{d@khC", true)] // Inside
+        [InlineData("klavHu}nWcwEquaBl{d@khCajUhyY", true)]
+        [InlineData("klavHu}nWcwEquaBl{d@khCbkt@nwnC", true, Skip = "TODO: should be fixed in later release")]
+        public void Polygon_Line_ShouldBeCoveredByBelgium(string polylineStr, bool shouldMatch)
+        {
+            // arrange
+            var polyline = Polyline.ParsePolyline(polylineStr);
+            var belgium = GeoConstants.BelgiumRough;
+
+            // act
+            var covers = belgium.Covers(polyline);
+
+            // assert
+            Assert.Equal(shouldMatch, covers);
+        }
+        
+        [Theory]
+        [InlineData("0,0,0,3,3,5,3,3,3,0", "2,2,1.5,2.5,1,1")] // Inside
+        public void Polygon_Line_ShouldBeCovered(string polygonStr, string lineStr)
+        {
+            // arrange
+            var polygon = Polygon.ParseCsv(polygonStr);
+            var line = Polyline.ParseCsv(lineStr);
+
+            // act
+            var covers = polygon.Covers(line);
+
+            // assert
+            Assert.True(covers);
+        }
+
+        [Theory]
+        [InlineData("0,1,0,4,3,4,3,1", "1,3.5,3,10,3,3", false)] // Start & stop outside, but crossing
+        [InlineData("0,1,0,4,3,4,3,1", "1,3.5,2,1.5,1,1.2", true)] // Start & stop outside, but crossing
+        public void Polygon_Covers_Line_ShouldMatch(string polygonStr, string segmentToMatch, bool shouldCover)
+        {
+            // arrange
+            var polygon = Polygon.ParseCsv(polygonStr);
+            var line = Polyline.ParseCsv(segmentToMatch);
+
+            // act
+            var intersects = polygon.Covers(line);
+
+            // assert
+            Assert.Equal(shouldCover, intersects);
+        }
+        
         [Theory]
         [InlineData("0,0,0,4,1,3,4,4", 4, 4, 0)]
         [InlineData("-1,-1,-4,-1,-4,-1,-4,-4", 4, -4, -1)]
-        [InlineData("0,1, -3,1, -1,-1.5, 3,2.5, -2,3, 2,-1, -1,2",7, -1, 1)]
-        public void Polygon_Parse_ShouldMatch(string polygonStr, int expectedVertices, double lastLongitude, double firstLatitude)
+        [InlineData("0,1, -3,1, -1,-1.5, 3,2.5, -2,3, 2,-1, -1,2", 7, -1, 1)]
+        public void Polygon_Parse_ShouldMatch(string polygonStr, int expectedVertices, double lastLongitude,
+            double firstLatitude)
         {
             // arrange
             var polygon = Polygon.ParseCsv(polygonStr);

@@ -151,7 +151,13 @@ namespace Columbae.Tests
         [Theory]
         [InlineData("0,4,3,1",  "1,2", PointPosition.Left)]
         [InlineData("0,4,3,1",  "2,2", PointPosition.OnLine)]
+        [InlineData("0,4,3,1",  "0,4", PointPosition.OnLine)]
+        [InlineData("0,4,3,1",  "3,1", PointPosition.OnLine)]
+        [InlineData("0,0,5,5",  "3,3", PointPosition.OnLine)]
+        [InlineData("5,5,0,0",  "3,3", PointPosition.OnLine)]
         [InlineData("0,4,3,1",  "3,2", PointPosition.Right)]
+        [InlineData("1,1,4,4",  "-3,-3", PointPosition.OnLineOffSegment)]
+        [InlineData("1,1,4,4",  "5,5", PointPosition.OnLineOffSegment)]
         public void Segment_GetPointPosition_ShouldMatch(string segmentStr, string pointToMatch, PointPosition expectedPosition)
         {
             // arrange

@@ -161,9 +161,11 @@ namespace Columbae
                             (End.X - Start.X) * (p.Y - Start.Y));
             if (i_isLeft > 0) // p is on the left
                 return PointPosition.Left;
-            else if (i_isLeft < 0)
+            if (i_isLeft < 0)
                 return PointPosition.Right;
-            return PointPosition.OnLine;
+            if(IsInArea(p))
+                return PointPosition.OnLine;
+            return PointPosition.OnLineOffSegment;
         }
 
         public bool Contains(Polypoint point, double margin = 0.0)
@@ -242,6 +244,7 @@ namespace Columbae
     {
         OnLine = 0,
         Left = 1,
-        Right = -1
+        Right = -1,
+        OnLineOffSegment = 2
     }
 }
