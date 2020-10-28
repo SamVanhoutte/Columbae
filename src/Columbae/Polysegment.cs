@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Columbae
 {
-    public class Polysegment
+    public class Polysegment : IShape, IEquatable<Polysegment>
     {
         public Polypoint Start { get; private set; }
         public Polypoint End { get; private set; }
@@ -229,6 +229,12 @@ namespace Columbae
             }
 
             return null;
+        }
+
+        public bool Equals(Polysegment other)
+        {
+            if (other == null) return false;
+            return Equals(other.Start, Start) && Equals(other.End, End);
         }
     }
 

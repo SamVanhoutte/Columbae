@@ -5,9 +5,10 @@ using System.Text;
 
 namespace Columbae
 {
-    public class Polyline : IShape
+    public class Polyline : IShape, IEquatable<Polyline>
     {
         public List<Polypoint> Vertices { get; private set; }
+        protected List<Polysegment> _sections;
 
         public Polyline()
         {
@@ -22,6 +23,11 @@ namespace Columbae
 
         // number of vertices
         protected int Size => Vertices?.Count ?? 0;
+
+        public bool Equals(Polyline other)
+        {
+            return other != null && string.Equals(ToString(), other.ToString());
+        }
 
         public override bool Equals(object obj)
         {
@@ -64,6 +70,12 @@ namespace Columbae
                     new Polypoint(minX, minY)
                 });
             }
+        }
+
+        // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
+        public bool Intersects(Polysegment s)
+        {
+            return Sections.Any(edge => s.Intersects(edge, out _));
         }
 
         public override string ToString()
@@ -155,7 +167,7 @@ namespace Columbae
             return sections;
         }
 
-        public List<Polysegment> Sections => GetSections(false);
+        public virtual List<Polysegment> Sections => _sections ??= GetSections(false);
 
         public static Polyline ParsePolyline(string polyline)
         {

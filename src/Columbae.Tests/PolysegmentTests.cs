@@ -140,9 +140,11 @@ namespace Columbae.Tests
             
             // act
             var intersects = segment1.Intersects(segment2, out var interSection);
-        
+            var inverseIntersects = segment2.Intersects(segment1, out _);
+            
             // assert
             Assert.True(intersects);
+            Assert.Equal(inverseIntersects, intersects);
             Assert.Equal(matchingPoint, interSection);
         }
         

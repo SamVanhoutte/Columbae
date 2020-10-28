@@ -7,19 +7,27 @@ namespace Columbae.Tests
     public class PolygonTests
     {
         [Theory]
-        [InlineData("0,1,2,0,1,3,3,3,2,2", "1,1")]
-        [InlineData("0,0,0,2,2,2,2,0", "1,1")]
-        public void Polygon_Contains_ShouldMatch(string polygonStr, string pointToMatch)
+        [InlineData("0,1,2,0,1,3,3,3,2,2", "1,1")] // Inside of polygon
+        [InlineData("0,0,0,2,2,2,2,0", "1,1")] // Inside of square
+        [InlineData("0,0,0,2,2,2,2,0", "0.01,1.99")] // Close to the edge
+        [InlineData("0,0,0,2,2,2,2,0", "2,2")] // On the vertex
+        [InlineData("0,0,0,2,2,2,2,0", "0,0")] // On the vertex
+        [InlineData("0,0,0,2,2,2,2,0", "0,2")] // On the vertex
+        [InlineData("0,0,0,2,2,2,2,0", "2,0")] // On the vertex
+        [InlineData("0,0,0,2,2,2,2,0", "1,0")] // On the edge
+        [InlineData("0,0,0,2,2,0", "1,0")] // On triangle
+        [InlineData("0,0,2,0,2,2,0,2", "3,2", false)] // Edge
+        public void Polygon_IsInside_ShouldMatch(string polygonStr, string pointToMatch, bool shouldBeInside = true)
         {
             // arrange
             var polygon = Polygon.ParseCsv(polygonStr);
             var matchingPoint = Polypoint.Parse(pointToMatch);
 
             // act
-            var isContained = polygon.Contains(matchingPoint);
+            var isContained = polygon.IsInside(matchingPoint);
 
             // assert
-            Assert.True(isContained);
+            Assert.Equal(shouldBeInside,isContained);
         }
 
         [Theory]
@@ -56,7 +64,25 @@ namespace Columbae.Tests
             // assert
             Assert.False(intersects);
         }
-        
+
+        [Theory]
+        [InlineData("0,0,2,0,2,2,0,2", "2,2,0,2", 4)]
+        [InlineData("0,0,2,2,2,0,0,2", "2,2,2,0", 4)]
+        [InlineData("0,0,2,2,2,0,0,2", "0,2,0,0", 4)]
+        public void Polygon_Sections_Shouldmatch(string polygonStr, string expectedSection, int expectedSections)
+        {
+            // arrange
+            var polygon = Polygon.ParseCsv(polygonStr);
+            var expectedSegment = Polysegment.Parse(expectedSection);
+            
+            // act
+            var sections = polygon.Sections;
+            
+            // assert
+            Assert.Equal(expectedSections, sections.Count);
+            Assert.Contains(expectedSegment, sections);
+        }
+
         [Theory]
         [InlineData("0,1, -3,1, -1,-1.5, 3,2.5, -2,3, 2,-1, -1,2", "-3,3,3,3,3,-1.5,-3,-1.5")]
         public void Polyline_Boundingbox_Shouldmatch(string polygonStr, string expectedBox)
