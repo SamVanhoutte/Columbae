@@ -4,30 +4,23 @@ using System.Linq;
 
 namespace Columbae
 {
-    public class Polygon 
+    public class Polygon : Polyline, IShape
     {
-        public readonly List<Polypoint> Vertices;
 
         // null constructor
-        public Polygon() : base()
+        public Polygon() : base(new List<Polypoint>{})
         {
-            Vertices = new List<Polypoint>();
+        }
+        
+        public Polygon(Polyline line) : base(line.Vertices)
+        {
         }
 
-        public Polygon(List<Polypoint> points)
+        public Polygon(List<Polypoint> vertices) : base(vertices)
         {
-            Vertices = points;
         }
 
-        public Polygon(string polyLineString)
-        {
-            var polyline = new Polyline(polyLineString);
-            Vertices = new List<Polypoint>();
-            foreach (var polypoint in polyline.Points)
-            {
-                AddVertex(polypoint);
-            }
-        }
+
         
 
         public override bool Equals(object obj)
@@ -36,36 +29,10 @@ namespace Columbae
             {
                 return string.Equals(ToString(), polygon.ToString());
             }
-
             return false;
         }
 
-        public Polygon BoundingBox => new Polyline(Vertices).BoundingBox;
         
-        // add a vertex
-        public void AddVertex(double lon, double lat)
-        {
-            AddVertex(new Polypoint(lon, lat));
-        }
-
-        // add a vertex
-        public void AddVertex(Polypoint point)
-        {
-            Vertices.Add(point);
-        }
-
-        // public List<Polysegment> Segments
-        // {
-        //     get
-        //     {
-        //         
-        //     }
-        // }
-        //
-        // number of vertices
-        private int Size => Vertices?.Count ?? 0;
-
-
         // check if a point is inside this polygon or not
         public bool Contains(Polypoint point)
         {
@@ -112,12 +79,12 @@ namespace Columbae
         // check if a part of the segment, of which 2 end points are the polygon's vertices, is inside this or not
         public bool Intersects(Polyline s)
         {
-            for (var i = 0; i < s.Points.Count; i++)
+            for (var i = 0; i < s.Vertices.Count; i++)
             {
                 // Takes 1 point and the next point
                 // Modulus means the first point will be taken again for last vertex
-                var p1 = s.Points[i];
-                var p2 = s.Points[(i + 1) % s.Points.Count];
+                var p1 = s.Vertices[i];
+                var p2 = s.Vertices[(i + 1) % s.Vertices.Count];
 
                 var edge = new Polysegment(p1, p2);
                 if (Intersects(edge))
@@ -199,26 +166,17 @@ namespace Columbae
             return false;
         }
 
-        public static Polygon Parse(string polygonString)
+        public static Polygon ParseCsv(string polygonString)
         {
-            // Format should be of X1,Y1,X2,X3,Y3,X4,Y4
-            var polygon = new Polygon();
-            var coordinates = polygonString.Split(',');
-            if (coordinates.Length >= 6 && coordinates.Length % 2 == 0) // minimum of 3 points needed
-            {
-                if (coordinates.All(s => double.TryParse(s, out var d)))
-                {
-                    for (var pointIdx = 0; pointIdx < coordinates.Length / 2; pointIdx++)
-                    {
-                        polygon.AddVertex(
-                            double.Parse(coordinates[pointIdx * 2]),
-                            double.Parse(coordinates[pointIdx * 2 + 1]));
-                    }
-
-                    return polygon;
-                }
-            }
-
+            var line = Polyline.ParseCsv(polygonString);
+            if (line != null && line.Vertices.Count > 2) return new Polygon(line);
+            return null;
+        }
+        
+        public static Polygon ParsePolyline(string polyline)
+        {
+            var line = Polyline.ParsePolyline(polyline);
+            if (line != null && line.Vertices.Count > 2) return new Polygon(line);
             return null;
         }
     }

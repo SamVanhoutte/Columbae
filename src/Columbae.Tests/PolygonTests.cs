@@ -12,7 +12,7 @@ namespace Columbae.Tests
         public void Polygon_Contains_ShouldMatch(string polygonStr, string pointToMatch)
         {
             // arrange
-            var polygon = Polygon.Parse(polygonStr);
+            var polygon = Polygon.ParseCsv(polygonStr);
             var matchingPoint = Polypoint.Parse(pointToMatch);
 
             // act
@@ -32,7 +32,7 @@ namespace Columbae.Tests
         public void Polygon_Intersects_ShouldMatch(string polygonStr, string segmentToMatch)
         {
             // arrange
-            var polygon = Polygon.Parse(polygonStr);
+            var polygon = Polygon.ParseCsv(polygonStr);
             var matchingSegment = Polysegment.Parse(segmentToMatch);
 
             // act
@@ -47,7 +47,7 @@ namespace Columbae.Tests
         public void Polygon_Intersects_ShouldNotMatch(string polygonStr, string segmentToMatch)
         {
             // arrange
-            var polygon = Polygon.Parse(polygonStr);
+            var polygon = Polygon.ParseCsv(polygonStr);
             var notMatchingSegment = Polysegment.Parse(segmentToMatch);
 
             // act
@@ -62,8 +62,8 @@ namespace Columbae.Tests
         public void Polyline_Boundingbox_Shouldmatch(string polygonStr, string expectedBox)
         {
             // arrange
-            var polygon = Polygon.Parse(polygonStr);
-            var expectedMatch = Polygon.Parse(expectedBox);
+            var polygon = Polygon.ParseCsv(polygonStr);
+            var expectedMatch = Polygon.ParseCsv(expectedBox);
 
             // act
             var box = polygon.BoundingBox;
@@ -81,7 +81,7 @@ namespace Columbae.Tests
         public void Polygon_Intersects_ShouldBeInBelgium(string polylineStr, bool shouldMatch)
         {
             // arrange
-            var polyline = new Polyline(polylineStr);
+            var polyline = Polyline.ParsePolyline(polylineStr);
             var belgium = GeoConstants.Belgium;
 
             // act
@@ -98,7 +98,7 @@ namespace Columbae.Tests
         public void Polygon_Parse_ShouldMatch(string polygonStr, int expectedVertices, double lastLongitude, double firstLatitude)
         {
             // arrange
-            var polygon = Polygon.Parse(polygonStr);
+            var polygon = Polygon.ParseCsv(polygonStr);
 
             // assert
             Assert.NotNull(polygon);
@@ -115,7 +115,7 @@ namespace Columbae.Tests
         public void Polygon_Parse_IncorrectValues_ShouldBeNull(string polygonStr)
         {
             // arrange
-            var polygon = Polygon.Parse(polygonStr);
+            var polygon = Polygon.ParseCsv(polygonStr);
 
             // assert
             Assert.Null(polygon);

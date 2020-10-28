@@ -14,9 +14,9 @@ namespace Columbae.Tests
             var input = "{\"type\":\"LineString\",\"coordinates\":[[22.3,-33.4],[-22.3,33.4]]}";
             var line = Geoline.Parse(input);
             Assert.NotNull(line);
-            Assert.Equal(2, line.Points.Count);
-            Assert.Equal(-33.4, line.Points[0].Y);
-            Assert.Equal(-22.3, line.Points[1].X);
+            Assert.Equal(2, line.Vertices.Count);
+            Assert.Equal(-33.4, line.Vertices[0].Y);
+            Assert.Equal(-22.3, line.Vertices[1].X);
         }
 
 
@@ -45,8 +45,8 @@ namespace Columbae.Tests
         public void GeoJsonLine_ParsePolyline_ShouldWork()
         {
             var polylineString = "adeuHqjlUo@i@u@e@uAu@u@]sB]g@EoCe@MA_@BsA^_@Pe@DgBw@aAYkAk@}A[QBaAn@m@R";
-            var polyline = new Polyline(polylineString);
-            var geoPolyline = new Geoline(polyline.Points);
+            var polyline = Polygon.ParsePolyline(polylineString);
+            var geoPolyline = new Geoline(polyline.Vertices);
             var outputString = geoPolyline.ToString();
             Assert.NotNull(outputString);
         }
@@ -76,8 +76,8 @@ namespace Columbae.Tests
         public void GeoJson_Generate_ShouldWork(string polylineString)
         {
             // arrange
-            var result = new Polyline(polylineString);
-            var geoPolyline = new Geoline(result.Points);
+            var result = Polygon.ParsePolyline(polylineString);
+            var geoPolyline = new Geoline(result.Vertices);
             
             // test
             var geoJson = geoPolyline.ToString();

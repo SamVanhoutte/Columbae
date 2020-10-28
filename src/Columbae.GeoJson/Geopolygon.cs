@@ -10,10 +10,10 @@ namespace Columbae.GeoJson
     {
         private Geoline _geoline;
 
-        public Geopolygon(List<Polypoint> points) :
-            base(points)
+        public Geopolygon(List<Polypoint> vertices) :
+            base(vertices)
         {
-            _geoline = new Geoline(points);
+            _geoline = new Geoline(vertices);
         }
 
         public List<Polypoint> Points => Vertices;
@@ -35,7 +35,7 @@ namespace Columbae.GeoJson
         public new static Geopolygon Parse(string json)
         {
             var line = Geoline.Parse(json, "Polygon");
-            return line != null ? new Geopolygon(line.Points) : null;
+            return line != null ? new Geopolygon(line.Vertices) : null;
         }
 
         private struct Linestring

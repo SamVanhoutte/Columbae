@@ -13,8 +13,8 @@ namespace Columbae.Tests.Routing
         public async Task Route_ExportGpx_ShouldWork()
         {
             var polylineString = "adeuHqjlUo@i@u@e@uAu@u@]sB]g@EoCe@MA_@BsA^_@Pe@DgBw@aAYkAk@}A[QBaAn@m@R";
-            var polyline = new Polyline(polylineString);
-            var route = new Route(polyline.Points);
+            var polyline = Polygon.ParsePolyline(polylineString);
+            var route = new Route(polyline.Vertices);
             var box = polyline.BoundingBox;
             var outputString = await route.ExportGpx();
             Assert.NotNull(outputString);
@@ -27,7 +27,7 @@ namespace Columbae.Tests.Routing
         public async Task Route_Contains_Section_ShouldWork(string routeName, string segmentPolystring, bool shouldContain)
         {
             var route = GetRoute(routeName);
-            var segment = new Polyline(segmentPolystring);
+            var segment = Polygon.ParsePolyline(segmentPolystring);
             Assert.NotNull(route);
             Assert.NotNull(segment);
 
@@ -42,7 +42,7 @@ namespace Columbae.Tests.Routing
             if (stream == null)
                 throw new Exception($"Unable to get manifest resource stream!: {resourceName}");
             var geoLine = Geoline.Parse(stream);
-            return new Route(geoLine.Points);
+            return new Route(geoLine.Vertices);
         }
     }
 }

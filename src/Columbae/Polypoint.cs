@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Columbae
 {
-    public class Polypoint
+    public class Polypoint : IShape
     {
         public Polypoint(double longitude, double latitude)
         {

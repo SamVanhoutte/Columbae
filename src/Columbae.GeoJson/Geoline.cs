@@ -7,7 +7,7 @@ namespace Columbae.GeoJson
 {
     public class Geoline : Polyline
     {
-        public Geoline(List<Polypoint> points) : base(points)
+        public Geoline(List<Polypoint> vertices) : base(vertices)
         {
         }
 
@@ -19,7 +19,7 @@ namespace Columbae.GeoJson
             ser.Serialize(writer, new Linestring()
             {
                 type = "LineString",
-                coordinates = Points.Select(pt => new[] {pt.X, pt.Y}).ToArray()
+                coordinates = Vertices.Select(pt => new[] {pt.X, pt.Y}).ToArray()
             });
             return stringWriter.ToString();
         }
