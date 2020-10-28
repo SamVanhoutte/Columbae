@@ -1,8 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Columbae.GeoJson;
-using Columbae.Routing;
+using Columbae.World;
 using Xunit;
 
 namespace Columbae.Tests.Routing
@@ -15,7 +14,6 @@ namespace Columbae.Tests.Routing
             var polylineString = "adeuHqjlUo@i@u@e@uAu@u@]sB]g@EoCe@MA_@BsA^_@Pe@DgBw@aAYkAk@}A[QBaAn@m@R";
             var polyline = Polygon.ParsePolyline(polylineString);
             var route = new Route(polyline.Vertices);
-            var box = polyline.BoundingBox;
             var outputString = await route.ExportGpx();
             Assert.NotNull(outputString);
         }
@@ -63,7 +61,7 @@ namespace Columbae.Tests.Routing
             Assert.NotNull(route);
             Assert.NotNull(segment);
 
-            var resultWithoutDirection = route.Contains(segment, 0);
+            var resultWithoutDirection = route.Contains(segment);
             Assert.True(resultWithoutDirection);
             var resultWithDirection = route.Contains(segment, 0, true);
             Assert.Equal(sameDirection, resultWithDirection);

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Columbae.GeoJson;
+using Columbae.World;
 using Newtonsoft.Json;
 
 namespace Columbae
@@ -58,7 +59,7 @@ namespace Columbae
             var coordinates = description.Split(',');
             if (coordinates.Length == 2)
             {
-                if (coordinates.All(s => double.TryParse(s, out var d)))
+                if (coordinates.All(s => double.TryParse(s, out _)))
                 {
                     //TODO :localization
                     return new Polypoint(double.Parse(coordinates[0]), double.Parse(coordinates[1]));
@@ -73,18 +74,18 @@ namespace Columbae
             var stringWriter = new StringWriter();
             var ser = new JsonSerializer();
             var writer = new JsonTextWriter(stringWriter);
-            ser.Serialize(writer,new Pointstring{type = "Point", coordinates = new [] {X, Y}});
+            ser.Serialize(writer,new Pointstring{Type = "Point", Coordinates = new [] {X, Y}});
             return stringWriter.ToString();
         }
 
         public static Polypoint ParseJson(string json)
         {
             var geoJsonPoint = JsonConvert.DeserializeObject<Pointstring>(json);
-            if (geoJsonPoint.type == "Point")
+            if (geoJsonPoint.Type == "Point")
             {
-                if (geoJsonPoint.coordinates != null)
+                if (geoJsonPoint.Coordinates != null)
                 {
-                    return new Polypoint(geoJsonPoint.coordinates[0], geoJsonPoint.coordinates[1]);
+                    return new Polypoint(geoJsonPoint.Coordinates[0], geoJsonPoint.Coordinates[1]);
                 }
             }
 

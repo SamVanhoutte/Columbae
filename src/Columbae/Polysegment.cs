@@ -1,14 +1,14 @@
 using System;
-using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Columbae
 {
     public class Polysegment : IShape, IEquatable<Polysegment>
     {
-        public Polypoint Start { get; private set; }
-        public Polypoint End { get; private set; }
+        const double Tolerance = 0.001;
+
+        public Polypoint Start { get; }
+        public Polypoint End { get; }
 
         public Polysegment(Polypoint point1, Polypoint point2)
         {
@@ -53,14 +53,13 @@ namespace Columbae
         public bool IsOnTheLine(Polypoint point)
         {
             //TODO : investigate this
-            if ((point.Y == Start.Y && point.X == Start.X)
-                || (point.Y == End.Y && point.X == End.X))
+            if ((Math.Abs(point.Y - Start.Y) < Tolerance && Math.Abs(point.X - Start.X) < Tolerance)
+                || (Math.Abs(point.Y - End.Y) < Tolerance && Math.Abs(point.X - End.X) < Tolerance))
             {
                 return true;
             }
 
-            return IsInArea(point) && ((point.X - Start.X) / (End.X - Start.X) ==
-                                       (point.Y - Start.Y) / (End.Y - Start.Y));
+            return IsInArea(point) && (Math.Abs((point.X - Start.X) / (End.X - Start.X) - (point.Y - Start.Y) / (End.Y - Start.Y)) < Tolerance);
         }
 
         //given a point that is in line (p1,p2)
@@ -68,8 +67,8 @@ namespace Columbae
         public bool IsInArea(Polypoint point)
         {
             //TODO : investigate this
-            if ((point.Y == Start.Y && point.X == Start.X)
-                || (point.Y == End.Y && point.X == End.X))
+            if ((Math.Abs(point.Y - Start.Y) < Tolerance && Math.Abs(point.X - Start.X) < Tolerance)
+                || (Math.Abs(point.Y - End.Y) < Tolerance && Math.Abs(point.X - End.X) < Tolerance))
             {
                 return true;
             }
@@ -93,16 +92,6 @@ namespace Columbae
             return IsInArea(new Polypoint(lat, lon));
         }
 
-        /// <summary>
-        /// Test whether two line segments intersect. If so, calculate the intersection point.
-        /// </summary>
-        /// <param name="p">Polypoint to the start point of p.</param>
-        /// <param name="p2">Polypoint to the end point of p.</param>
-        /// <param name="q">Polypoint to the start point of q.</param>
-        /// <param name="q2">Polypoint to the end point of q.</param>
-        /// <param name="intersection">The point of intersection, if any.</param>
-        /// <param name="considerOverlapAsIntersect">Do we consider overlapping lines as intersecting?</param>
-        /// <returns>True if an intersection point was found.</returns>
         public bool Intersects(Polysegment seg, out Polypoint intersection, bool considerOverlapAsIntersect = true)
         {
             intersection = null;
@@ -157,15 +146,13 @@ namespace Columbae
 
         public PointPosition GetPointPositioning(Polypoint p)
         {
-            var i_isLeft = ((End.Y - Start.Y) * (p.X - Start.X) -
+            var t = ((End.Y - Start.Y) * (p.X - Start.X) -
                             (End.X - Start.X) * (p.Y - Start.Y));
-            if (i_isLeft > 0) // p is on the left
+            if (t > 0) // p is on the left
                 return PointPosition.Left;
-            if (i_isLeft < 0)
+            if (t < 0)
                 return PointPosition.Right;
-            if(IsInArea(p))
-                return PointPosition.OnLine;
-            return PointPosition.OnLineOffSegment;
+            return IsInArea(p) ? PointPosition.OnLine : PointPosition.OnLineOffSegment;
         }
 
         public bool Contains(Polypoint point, out Polypoint closestPoint, double margin = 0.0)
@@ -221,7 +208,7 @@ namespace Columbae
             var coordinates = segmentString.Split(',');
             if (coordinates.Length == 4)
             {
-                if (coordinates.All(s => double.TryParse(s, out var d)))
+                if (coordinates.All(s => double.TryParse(s, out _)))
                 {
                     //TODO :localization
                     return new Polysegment(

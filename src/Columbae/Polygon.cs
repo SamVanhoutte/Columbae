@@ -7,9 +7,9 @@ using Newtonsoft.Json;
 
 namespace Columbae
 {
-    public class Polygon : Polyline, IShape, IEquatable<Polygon>
+    public class Polygon : Polyline, IEquatable<Polygon>
     {
-        public Polygon() : base(new List<Polypoint> { })
+        public Polygon() : base(new List<Polypoint>())
         {
         }
 
@@ -41,7 +41,7 @@ namespace Columbae
             return ToPolylineString().GetHashCode();
         }
 
-        public override List<Polysegment> Sections => _sections ??= GetSections(true);
+        public override List<Polysegment> Sections => CachedSections ??= GetSections(true);
 
         // check if a point is inside this polygon or not
         public bool IsInside(Polypoint pt)
@@ -87,9 +87,9 @@ namespace Columbae
         public bool Covers(Polysegment s)
         {
             // if segment is a edge of this polygon
-            var p1_pos = IndexOf(s.Start);
-            var p2_pos = IndexOf(s.End);
-            if (p1_pos != -1 && p2_pos != -1)
+            var p1Pos = IndexOf(s.Start);
+            var p2Pos = IndexOf(s.End);
+            if (p1Pos != -1 && p2Pos != -1)
             {
                 // If both points are vertex of polygon, we consider it covered
                 return true;
@@ -136,8 +136,8 @@ namespace Columbae
             var writer = new JsonTextWriter(stringWriter);
             ser.Serialize(writer,new Linestring()
             {
-                type = "Polygon",
-                coordinates = Vertices.Select(pt => new[] {pt.X, pt.Y}).ToArray()
+                Type = "Polygon",
+                Coordinates = Vertices.Select(pt => new[] {pt.X, pt.Y}).ToArray()
             });
             return stringWriter.ToString();
         }

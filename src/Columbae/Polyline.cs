@@ -11,7 +11,7 @@ namespace Columbae
     public class Polyline : IShape, IEquatable<Polyline>
     {
         public List<Polypoint> Vertices { get; private set; }
-        protected List<Polysegment> _sections;
+        protected List<Polysegment> CachedSections;
 
         public Polyline()
         {
@@ -49,14 +49,14 @@ namespace Columbae
         // add a Point
         public void AddVertex(double lon, double lat)
         {
-            _sections = null;
+            CachedSections = null;
             AddVertex(new Polypoint(lon, lat));
         }
 
         // add a vertex
         public void AddVertex(Polypoint point)
         {
-            _sections = null;
+            CachedSections = null;
             Vertices ??= new List<Polypoint>();
             Vertices.Add(point);
         }
@@ -128,7 +128,7 @@ namespace Columbae
             // In case the boundingbox of the line does not contain the actual start/end, we return false immediately
             if (BoundingBox.Intersects(sequence.EndToEndSegment))
             {
-                var segmentSequence = new List<Polysegment> { };
+                var segmentSequence = new List<Polysegment>();
                 // Now we loop all points of the sequence and check if they are in the given boundaries of the polygon
                 foreach (var sequencePoint in sequence.Vertices)
                 {
@@ -184,7 +184,7 @@ namespace Columbae
 
         internal List<Polysegment> GetSections(bool closePolygon)
         {
-            var sections = new List<Polysegment> { };
+            var sections = new List<Polysegment>();
             // Loop through all points and create segment
             for (var pointIndx = 0; pointIndx < Vertices.Count - 1; pointIndx++)
             {
@@ -199,7 +199,7 @@ namespace Columbae
             return sections;
         }
 
-        public virtual List<Polysegment> Sections => _sections ??= GetSections(false);
+        public virtual List<Polysegment> Sections => CachedSections ??= GetSections(false);
 
         public string ToPolylineString()
         {
@@ -228,8 +228,8 @@ namespace Columbae
             var writer = new JsonTextWriter(stringWriter);
             ser.Serialize(writer, new Linestring()
             {
-                type = "LineString",
-                coordinates = Vertices.Select(pt => new[] {pt.X, pt.Y}).ToArray()
+                Type = "LineString",
+                Coordinates = Vertices.Select(pt => new[] {pt.X, pt.Y}).ToArray()
             });
             return stringWriter.ToString();
         }
@@ -253,11 +253,11 @@ namespace Columbae
         {
             var points = new List<Polypoint>();
             var geoJsonLine = JsonConvert.DeserializeObject<Linestring>(json);
-            if (geoJsonLine.type == geoType)
+            if (geoJsonLine.Type == geoType)
             {
-                if (geoJsonLine.coordinates != null)
+                if (geoJsonLine.Coordinates != null)
                 {
-                    points = geoJsonLine.coordinates.Select(c => new Polypoint(c[0], c[1])).ToList();
+                    points = geoJsonLine.Coordinates.Select(c => new Polypoint(c[0], c[1])).ToList();
                     return new Polyline(points);
                 }
             }
@@ -272,7 +272,7 @@ namespace Columbae
             var coordinates = csvString.Split(',');
             if (coordinates.Length % 2 == 0)
             {
-                if (coordinates.All(s => double.TryParse(s, out var d)))
+                if (coordinates.All(s => double.TryParse(s, out _)))
                 {
                     for (var pointIdx = 0; pointIdx < coordinates.Length / 2; pointIdx++)
                     {

@@ -1,7 +1,6 @@
 using System;
-using System.Drawing;
 
-namespace Columbae
+namespace Columbae.World
 {
     public class Calculator
     {

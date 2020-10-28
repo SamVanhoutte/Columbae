@@ -131,11 +131,11 @@ namespace Columbae.Tests
         [InlineData("0,0,3,1", "0,0,3,3", "0,0")]
         [InlineData("10,4,3,1", "10,0,3,1", "3,1")]
         [InlineData("1,1,1,4", "0,1,3,4", "1,2")]
-        public void TestIntersection(string segment1str, string segment2str, string expectedPointstr)
+        public void TestIntersection(string segment1Str, string segment2Str, string expectedPointstr)
         {
             // arrange
-            var segment1 = Polysegment.Parse(segment1str);
-            var segment2 = Polysegment.Parse(segment2str);
+            var segment1 = Polysegment.Parse(segment1Str);
+            var segment2 = Polysegment.Parse(segment2Str);
             var matchingPoint = Polypoint.ParseCsv(expectedPointstr);
             
             // act

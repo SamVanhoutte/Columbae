@@ -1,4 +1,5 @@
 using System;
+using Columbae.World;
 using Xunit;
 
 namespace Columbae.Tests

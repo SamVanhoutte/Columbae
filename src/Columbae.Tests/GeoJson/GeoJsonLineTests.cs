@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Columbae.GeoJson;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace Columbae.Tests
+namespace Columbae.Tests.GeoJson
 {
     public class GeoJsonLineTests
     {

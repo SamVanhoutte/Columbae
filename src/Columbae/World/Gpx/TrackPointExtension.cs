@@ -1,6 +1,6 @@
 using System.Xml.Serialization;
 
-namespace Columbae.Routing.Gpx
+namespace Columbae.World.Gpx
 {
     [XmlRoot(ElementName = "TrackPointExtension",
         Namespace = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1")]
