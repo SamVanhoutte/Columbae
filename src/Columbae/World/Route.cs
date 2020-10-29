@@ -10,14 +10,12 @@ using Columbae.World.Gpx;
 
 namespace Columbae.World
 {
-    public class Route
+    public class Route : Polyline
     {
-        private List<Polypoint> _points;
         public string Name { get; set; }
         
-        public Route(List<Polypoint> points)
+        public Route(List<Polypoint> points):base(points)
         {
-            _points = points;
         }
 
         public async Task<string> ExportGpx()
@@ -59,7 +57,7 @@ namespace Columbae.World
                 {
                     Name = Name, Type = "1", Trkseg = new Trkseg
                     {
-                        Trkpt = _points.Select(polypoint => new Trkpt {Ele = 0.0, Lat = polypoint.Y, Lon = polypoint.X}).ToList()
+                        Trkpt = Vertices.Select(polypoint => new Trkpt {Ele = 0.0, Lat = polypoint.Y, Lon = polypoint.X}).ToList()
                     }
                 }
             };
@@ -69,12 +67,6 @@ namespace Columbae.World
             // var serializer = new DataContractSerializer(typeof(GpxRoute)); 
             // var writer = XmlWriter.Create(outputWriter);
             // serializer.WriteObject(writer, route);
-        }
-
-        public bool Contains(Polyline segment, double margin = 0.0D, bool verifyDirection = false)
-        {
-            var line = new Polyline(_points);
-            return line.Contains(segment, margin, verifyDirection);
         }
     }
     
