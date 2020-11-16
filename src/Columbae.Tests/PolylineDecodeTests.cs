@@ -44,7 +44,7 @@ namespace Columbae.Tests
         }
 
         // TODO : this segment does not parse
-        [Theory(Skip = "TODO: should be fixed")]
+        [Theory]
         [InlineData(@"wvduHmyjU_CbAi@R_@FiAJkCz@cBd@{@T]Bu@Pq@TeAd@q@b@u@\\mAt@i@^aCtB[^Wf@w@bCI^Kv@A`AEh@]zBU`CKf@GPQTcA`A")]
         public void Constructor_ShouldParse(string polylineString)
         {
