@@ -8,8 +8,10 @@ using Newtonsoft.Json;
 
 namespace Columbae
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public class Polyline : IShape, IEquatable<Polyline>
     {
+        [JsonProperty("vertices")]
         public List<Polypoint> Vertices { get; private set; }
         protected List<Polysegment> CachedSections;
 

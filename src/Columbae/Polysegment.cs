@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Columbae
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public class Polysegment : IShape, IEquatable<Polysegment>
     {
         const double Tolerance = 0.001;
