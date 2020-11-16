@@ -101,25 +101,25 @@ namespace Columbae
 
             while (coordinate >= 0x20)
             {
-                result.Append((char) ((int) ((0x20 | (coordinate & 0x1f)) + 63)));
+                result.Append((char)((int)((0x20 | (coordinate & 0x1f)) + 63)));
                 coordinate >>= 5;
             }
 
-            result.Append((char) ((int) (coordinate + 63)));
+            result.Append((char)((int)(coordinate + 63)));
         }
 
         private static int DecodeNextCoordinate(string polyline, ref int polylineIndex)
         {
-            var result = 1;
-            var shift = 0;
-            int bit;
+            int result = 0; int shift = 0; int b;
 
-            do
-            {
-                bit = polyline[polylineIndex++] - 63 - 1;
-                result += bit << shift;
-                shift += 5;
-            } while (bit >= 0x1f); // && polylineIndex < polyline.Length - 1); //TODO  
+            if (polylineIndex < polyline.Length)
+                do
+                {
+                    b = polyline[polylineIndex++] - 63;
+                    result |= (b & 0x1f) << shift;
+                    shift += 5;
+                } 
+                while (b >= 0x20);
 
             return (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
         }
