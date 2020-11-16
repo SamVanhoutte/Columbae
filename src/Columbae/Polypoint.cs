@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 
 namespace Columbae
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public class Polypoint : IShape
     {
         public Polypoint(double longitude, double latitude)
@@ -20,7 +21,9 @@ namespace Columbae
             return $"{X:0.00000} {Y:0.00000}";
         }
 
+        [JsonProperty("y")]
         public double Y { get; private set; }
+        [JsonProperty("x")]
         public double X { get; private set; }
         public double Longitude => X;
         public double Latitude => Y;

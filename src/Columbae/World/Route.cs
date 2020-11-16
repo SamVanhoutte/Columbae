@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using Columbae.World.Gpx;
+using Newtonsoft.Json;
 
 namespace Columbae.World
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public class Route : Polyline
     {
+        [JsonProperty("name")]
         public string Name { get; set; }
         
         public Route(List<Polypoint> points):base(points)
