@@ -20,7 +20,9 @@
 
     <ItemGroup>
       <None Remove="Resources\route01.json" />
-      <EmbeddedResource Include="Resources\route01.json" />
+        <EmbeddedResource Include="Resources\route01.json" />
+        <EmbeddedResource Include="Resources\multitrack.gpx" />
+        <EmbeddedResource Include="Resources\singletrack.gpx" />
     </ItemGroup>
 
 </Project>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace Columbae.World.Gpx
@@ -9,7 +10,7 @@ namespace Columbae.World.Gpx
         public Metadata Metadata { get; set; }
 
         [XmlElement(ElementName = "trk", Namespace = "http://www.topografix.com/GPX/1/1")]
-        public Trk Trk { get; set; }
+        public List<Trk> Trk { get; set; }
 
         [XmlAttribute(AttributeName = "creator")]
         public string Creator { get; set; }
