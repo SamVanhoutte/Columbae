@@ -7,22 +7,20 @@ namespace Columbae.OpenStreetMap;
 
 public class RegionQueryResults
 {
-    [JsonPropertyName("tags")]
-    public Dictionary<string, string>? Tags { get; set; }
+    [JsonPropertyName("tags")] public Dictionary<string, string>? Tags { get; set; }
 
-    [JsonPropertyName("region")]
-    public Polygon[] Region { get; set; }
+    [JsonPropertyName("region")] public MultiPolygon Region { get; set; }
 
     internal static RegionQueryResults Empty => new RegionQueryResults();
-    
+
     internal static RegionQueryResults FromOverpass(OverpassResponse response)
     {
-        var regionElement = response.Elements.FirstOrDefault();
+        var regionElement = response.Elements.FirstOrDefault(e => e.Members?.Any() ?? false);
         if (regionElement == null) return RegionQueryResults.Empty;
         return new RegionQueryResults
         {
             Tags = regionElement.Tags,
-            Region = regionElement.Members.ToPolygons().ToArray()
+            Region = new MultiPolygon(regionElement.Members.ToPolygons().ToList())
         };
     }
 }

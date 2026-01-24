@@ -156,5 +156,7 @@ namespace Columbae
             if (line != null && line.Vertices.Count > 2) return new Polygon(line);
             return null;
         }
+
+
     }
 }

@@ -32,7 +32,24 @@ public static class OverpassQueryBuilder
     /// <summary>
     /// Build Overpass QL query for specific tag by name
     /// </summary>
-    public static string BuildSearchTagByName(string name, List<OsmTag> tags, bool caseSensitive = true, int timeout = 180)
+    public static string QueryRegionById(long osmId, int timeout = 180)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"[out:json][timeout:{timeout}];");
+        sb.AppendLine("(");
+        sb.AppendLine($"relation({osmId});");
+        sb.AppendLine($"way({osmId});");
+        sb.AppendLine(");");
+        sb.AppendLine("out geom;");
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Build Overpass QL query for specific tag by name
+    /// </summary>
+    public static string QueryByNameAndTags(string name, List<OsmTag> tags, bool caseSensitive = true,
+        int timeout = 180)
     {
         var sb = new StringBuilder();
         sb.AppendLine($"[out:json][timeout:{timeout}];");
@@ -41,10 +58,11 @@ public static class OverpassQueryBuilder
         {
             // Query for nodes with this tag in the bounding box
             sb.AppendLine();
-            sb.Append(caseSensitive ? 
-                $"  nwr[\"name\"=\"{name}\"][\"{tag.Key}\"=\"{tag.Value}\"];":
-                $"  nwr[\"name\"~\"{name}\",i][\"{tag.Key}\"=\"{tag.Value}\"];");
+            sb.Append(caseSensitive
+                ? $"  nwr[\"name\"=\"{name}\"][\"{tag.Key}\"=\"{tag.Value}\"];"
+                : $"  nwr[\"name\"~\"{name}\",i][\"{tag.Key}\"=\"{tag.Value}\"];");
         }
+
         sb.AppendLine();
         sb.AppendLine(");");
         sb.AppendLine("out geom;");

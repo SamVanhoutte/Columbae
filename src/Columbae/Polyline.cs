@@ -236,6 +236,11 @@ namespace Columbae
             return stringWriter.ToString();
         }
 
+        public double[][] ToArray()
+        {
+            return Vertices.Select(v=> new[] {v.X, v.Y}).ToArray();
+        }
+        
         public static Polyline ParsePolyline(string polyline)
         {
             var vertices = new List<Polypoint>(polyline.Length / 2);

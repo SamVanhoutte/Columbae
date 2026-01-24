@@ -1,5 +1,5 @@
 
-namespace Columbae.OpenStreetMap.Api;
+namespace Columbae.OpenStreetMap;
 
 /// <summary>
 /// OSM tag filter (key=value)

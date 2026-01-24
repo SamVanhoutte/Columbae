@@ -18,7 +18,7 @@ public class OverpassApiClient(
     ILogger<OverpassApiClient> logger)
     : IOverpassApiClient
 {
-    private static readonly ActivitySource activitySource = new("Spotty.OverpassApiClient");
+    private static readonly ActivitySource activitySource = new("Columbae.OverpassApiClient");
     public static Uri BaseUrl => new Uri("https://overpass-api.de/api/interpreter/");
 
     // public OverpassApiClient()
@@ -44,7 +44,7 @@ public class OverpassApiClient(
         try
         {
             logger.LogInformation("Executing Overpass API query: {QueryPreview}...",
-                query.Length > 100 ? query[..99] : query);
+                query);
 
             var content = new StringContent(query, Encoding.UTF8, "application/x-www-form-urlencoded");
             var response = await httpClient.PostAsync("", content, cancellationToken);

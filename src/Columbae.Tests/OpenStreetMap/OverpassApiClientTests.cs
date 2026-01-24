@@ -18,13 +18,13 @@ public class OverpassApiClientTests
     {
         IOverpassApiClient apiClient = new OverpassApiClient(new HttpClient(), new NullLogger<OverpassApiClient>());
         var parkName1 = "Yellowstone National Park";
-        var query1 = OverpassQueryBuilder.BuildSearchTagByName(parkName1,
+        var query1 = OverpassQueryBuilder.QueryByNameAndTags(parkName1,
             [OsmTag.Parse("boundary=national_park"), OsmTag.Parse("leisure=nature_reserve"), 
                 OsmTag.Parse("boundary=protected_area")], timeout: 180);
         var result1 = await apiClient.QueryAsync(query1);
         Assert.NotNull(result1);
         var parkName2 = "yellowstone national park";
-        var query2 = OverpassQueryBuilder.BuildSearchTagByName(parkName2,
+        var query2 = OverpassQueryBuilder.QueryByNameAndTags(parkName2,
         [OsmTag.Parse("boundary=national_park"), OsmTag.Parse("leisure=nature_reserve"), 
             OsmTag.Parse("boundary=protected_area")], caseSensitive:false, timeout: 180);
         var result2 = await apiClient.QueryAsync(query2);
@@ -37,11 +37,11 @@ public class OverpassApiClientTests
     {
         IOverpassApiClient apiClient = new OverpassApiClient(OverpassApiClient.CreateHttpClient(), new NullLogger<OverpassApiClient>());
         var parkName1 = "Yellowstone National Park";
-        var query1 = OverpassQueryBuilder.BuildSearchTagByName(parkName1,
+        var query1 = OverpassQueryBuilder.QueryByNameAndTags(parkName1,
         [OsmTag.Parse("boundary=national_park"), OsmTag.Parse("leisure=nature_reserve"), 
             OsmTag.Parse("boundary=protected_area")], timeout: 180);
         var result1 = await apiClient.QueryRegionAsync(query1);
         Assert.NotNull(result1);
-        Assert.NotEmpty(result1.Region);
+        Assert.NotEmpty(result1.Region.Polygons);
     }
 }
