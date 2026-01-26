@@ -22,5 +22,5 @@ public interface IOverpassApiClient
     /// <exception cref="InvalidOperationException">Thrown when response JSON cannot be parsed</exception>
     Task<OverpassResponse> QueryAsync(string query, CancellationToken cancellationToken = default);
 
-    Task<RegionQueryResults> QueryRegionAsync(string query, CancellationToken cancellationToken = default);
+    Task<RegionQueryResult> QueryRegionAsync(string query, CancellationToken cancellationToken = default);
 }

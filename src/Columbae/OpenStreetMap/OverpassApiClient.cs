@@ -108,10 +108,10 @@ public class OverpassApiClient(
     /// <summary>
     /// Execute an Overpass QL query and return OSM elements
     /// </summary>
-    public async Task<RegionQueryResults> QueryRegionAsync(string query, CancellationToken cancellationToken = default)
+    public async Task<RegionQueryResult> QueryRegionAsync(string query, CancellationToken cancellationToken = default)
     {
         var overpassResponse = await QueryAsync(query, cancellationToken);
-        return RegionQueryResults.FromOverpass(overpassResponse);
+        return RegionQueryResult.FromOverpass(overpassResponse);
     }
 
     public static HttpClient CreateHttpClient()
