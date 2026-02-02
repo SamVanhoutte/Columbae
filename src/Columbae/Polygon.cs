@@ -157,6 +157,11 @@ namespace Columbae
             return null;
         }
 
+        public double[][] ToArray()
+        {
+            return Vertices.Select(v => v.ToArray()).ToArray();
+        }
+        
 
     }
 }

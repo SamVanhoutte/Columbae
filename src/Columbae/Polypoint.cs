@@ -124,5 +124,10 @@ namespace Columbae
         {
             return new Polypoint(v.X * mult, v.Y * mult);
         }
+        
+        public double[] ToArray()
+        {
+            return [X, Y];
+        }
     }
 }
